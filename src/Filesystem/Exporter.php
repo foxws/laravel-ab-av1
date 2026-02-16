@@ -76,7 +76,7 @@ class Exporter
             $directory = dirname($this->path);
 
             if ($directory !== '.') {
-                $this->filesystem->makeDirectory($directory, 0755, true, true);
+                $this->filesystem->makeDirectory($directory);
             }
 
             // Copy file to destination
