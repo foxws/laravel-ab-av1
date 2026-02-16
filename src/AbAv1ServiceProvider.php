@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Foxws\AbAv1;
 
 use Foxws\AbAv1\Commands\AbAv1Command;
@@ -17,9 +19,18 @@ class AbAv1ServiceProvider extends PackageServiceProvider
          */
         $package
             ->name('laravel-ab-av1')
-            ->hasConfigFile()
-            ->hasViews()
-            ->hasMigration('create_laravel_ab_av1_table')
+            ->hasConfigFile('ab-av1')
             ->hasCommand(AbAv1Command::class);
+    }
+
+    public function registeringPackage(): void
+    {
+        // Register the main AbAv1 class as singleton
+        $this->app->singleton(AbAv1::class, function () {
+            return new AbAv1;
+        });
+
+        // Bind to package name for facade access
+        $this->app->alias(AbAv1::class, 'ab-av1');
     }
 }
