@@ -64,6 +64,14 @@ class AbAv1ServiceProvider extends PackageServiceProvider
             $encoder = Encoder::create($logger, $tempDirs, $config['timeout'] ?? 3600);
 
             // Apply configuration defaults
+            if (filled($config['preset'] ?? null)) {
+                $encoder->withPreset($config['preset']);
+            }
+
+            if (filled($config['min_vmaf'] ?? null)) {
+                $encoder->withMinVMAF($config['min_vmaf']);
+            }
+
             if (filled($config['max_encoded_percent'] ?? null)) {
                 $encoder->withMaxEncodedPercent($config['max_encoded_percent']);
             }
