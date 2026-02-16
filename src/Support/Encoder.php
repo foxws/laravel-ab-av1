@@ -9,7 +9,11 @@ use Foxws\AbAv1\Events\EncodingFailed;
 use Foxws\AbAv1\Events\EncodingStarted;
 use Foxws\AbAv1\Exceptions\ExecutableNotFoundException;
 use Foxws\AbAv1\Exceptions\InvalidEncodingConfigurationException;
+use Foxws\AbAv1\Filesystem\Exporter;
+use Foxws\AbAv1\Filesystem\TemporaryDirectories;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Facades\Storage;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -30,19 +34,73 @@ class Encoder
 
     protected ?string $outputPath = null;
 
+    protected ?string $disk = null;
+
+    protected ?Filesystem $filesystem = null;
+
+    protected ?TemporaryDirectories $temporaryDirectories = null;
+
     protected array $ffmpegOptions = [];
 
-    protected array $encInputOptions = [];
-
-    public function __construct(?LoggerInterface $logger = null)
+    public function __construct(?LoggerInterface $logger = null, ?TemporaryDirectories $temporaryDirectories = null, ?int $timeout = null)
     {
         $this->logger = $logger;
         $this->builder = CommandBuilder::make();
+        $this->temporaryDirectories = $temporaryDirectories ?? app(TemporaryDirectories::class);
+        $this->timeout = $timeout ?? 3600;
     }
 
-    public static function create(?LoggerInterface $logger = null): self
+    public static function create(?LoggerInterface $logger = null, ?TemporaryDirectories $temporaryDirectories = null, ?int $timeout = null): self
     {
-        return new self($logger);
+        return new self($logger, $temporaryDirectories, $timeout);
+    }
+
+    /**
+     * Set the input path internally (used by MediaOpener)
+     */
+    public function setInputPath(string $path): void
+    {
+        $this->inputPath = $path;
+    }
+
+    /**
+     * Set the disk to use for media operations (like Laravel Streamer)
+     */
+    public function fromDisk(string $disk): self
+    {
+        $this->disk = $disk;
+        $this->filesystem = Storage::disk($disk);
+
+        if ($this->logger) {
+            $this->logger->debug('Set disk', ['disk' => $disk]);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set the input file path relative to the disk
+     */
+    public function path(string $path): self
+    {
+        if (! $this->filesystem) {
+            throw new \RuntimeException('Disk must be set before setting path. Use fromDisk() first.');
+        }
+
+        if (! $this->filesystem->exists($path)) {
+            throw new \RuntimeException("Input file not found on disk '{$this->disk}': {$path}");
+        }
+
+        // Get raw path of the file
+        $fullPath = $this->filesystem->path($path);
+        $this->inputPath = $fullPath;
+        $this->builder->withInput($fullPath);
+
+        if ($this->logger) {
+            $this->logger->debug('Set input path', ['path' => $path, 'full_path' => $fullPath]);
+        }
+
+        return $this;
     }
 
     public function getBuilder(): CommandBuilder
@@ -69,6 +127,9 @@ class Encoder
         return $this->timeout;
     }
 
+    /**
+     * Set input file path directly (for backward compatibility or when not using disk/path)
+     */
     public function withInput(string $path): self
     {
         if (! file_exists($path)) {
@@ -100,7 +161,7 @@ class Encoder
         return $this;
     }
 
-    public function withPreset(string $preset): self
+    public function withPreset(int|string $preset): self
     {
         $this->builder->withPreset($preset);
 
@@ -270,6 +331,28 @@ class Encoder
             ->withDistortedFile($distortedFile);
 
         return $this->executeCommand('xpsnr');
+    }
+
+    /**
+     * Create an exporter for saving encoded files
+     */
+    public function export(): Exporter
+    {
+        if (! $this->outputPath) {
+            throw new \RuntimeException('Output path must be set before export. Use withOutput() first.');
+        }
+
+        return new Exporter($this->outputPath);
+    }
+
+    /**
+     * Clean up temporary directories
+     */
+    public function cleanupTemporaryFiles(): void
+    {
+        if ($this->temporaryDirectories) {
+            $this->temporaryDirectories->deleteAll();
+        }
     }
 
     /**

@@ -7,7 +7,6 @@
  */
 
 use Foxws\AbAv1\Facades\AbAv1;
-use Foxws\AbAv1\Support\Encoder;
 
 /**
  * Example 1: Auto-encode with VMAF targeting
@@ -26,12 +25,12 @@ function example_auto_encode(): void
     try {
         $result = $encoder->autoEncode();
 
-        echo "VMAF Score: {$result->getVMAFScore()}" . PHP_EOL;
-        echo "CRF Used: {$result->getCRFUsed()}" . PHP_EOL;
-        echo "Estimated Size: {$result->getEstimatedSize()} bytes" . PHP_EOL;
-        echo "Estimated Time: {$result->getEstimatedTime()} seconds" . PHP_EOL;
+        echo "VMAF Score: {$result->getVMAFScore()}".PHP_EOL;
+        echo "CRF Used: {$result->getCRFUsed()}".PHP_EOL;
+        echo "Estimated Size: {$result->getEstimatedSize()} bytes".PHP_EOL;
+        echo "Estimated Time: {$result->getEstimatedTime()} seconds".PHP_EOL;
     } catch (\Exception $e) {
-        echo "Encoding failed: {$e->getMessage()}" . PHP_EOL;
+        echo "Encoding failed: {$e->getMessage()}".PHP_EOL;
     }
 }
 
@@ -52,10 +51,10 @@ function example_encode_with_crf(): void
     try {
         $result = $encoder->encode();
 
-        echo "Encoding completed!" . PHP_EOL;
-        echo "Output: {$result->getOutputPath()}" . PHP_EOL;
+        echo 'Encoding completed!'.PHP_EOL;
+        echo "Output: {$result->getOutputPath()}".PHP_EOL;
     } catch (\Exception $e) {
-        echo "Encoding failed: {$e->getMessage()}" . PHP_EOL;
+        echo "Encoding failed: {$e->getMessage()}".PHP_EOL;
     }
 }
 
@@ -75,11 +74,11 @@ function example_crf_search(): void
     try {
         $result = $encoder->crfSearch();
 
-        echo "Search Result:" . PHP_EOL;
-        echo "  CRF: {$result->getCRFUsed()}" . PHP_EOL;
-        echo "  VMAF: {$result->getVMAFScore()}" . PHP_EOL;
+        echo 'Search Result:'.PHP_EOL;
+        echo "  CRF: {$result->getCRFUsed()}".PHP_EOL;
+        echo "  VMAF: {$result->getVMAFScore()}".PHP_EOL;
     } catch (\Exception $e) {
-        echo "CRF search failed: {$e->getMessage()}" . PHP_EOL;
+        echo "CRF search failed: {$e->getMessage()}".PHP_EOL;
     }
 }
 
@@ -98,12 +97,12 @@ function example_sample_encode(): void
     try {
         $result = $encoder->sampleEncode();
 
-        echo "Sample Encode Results:" . PHP_EOL;
-        echo "  VMAF Score: {$result->getVMAFScore()}" . PHP_EOL;
-        echo "  Predicted Size: " . round($result->getEstimatedSize() / 1024 / 1024, 2) . " MB" . PHP_EOL;
-        echo "  Predicted Time: " . round($result->getEstimatedTime() / 60, 2) . " minutes" . PHP_EOL;
+        echo 'Sample Encode Results:'.PHP_EOL;
+        echo "  VMAF Score: {$result->getVMAFScore()}".PHP_EOL;
+        echo '  Predicted Size: '.round($result->getEstimatedSize() / 1024 / 1024, 2).' MB'.PHP_EOL;
+        echo '  Predicted Time: '.round($result->getEstimatedTime() / 60, 2).' minutes'.PHP_EOL;
     } catch (\Exception $e) {
-        echo "Sample encoding failed: {$e->getMessage()}" . PHP_EOL;
+        echo "Sample encoding failed: {$e->getMessage()}".PHP_EOL;
     }
 }
 
@@ -122,9 +121,9 @@ function example_using_defaults(): void
     try {
         $result = $encoder->autoEncode();
 
-        echo "Encoding with defaults completed!" . PHP_EOL;
+        echo 'Encoding with defaults completed!'.PHP_EOL;
     } catch (\Exception $e) {
-        echo "Failed: {$e->getMessage()}" . PHP_EOL;
+        echo "Failed: {$e->getMessage()}".PHP_EOL;
     }
 }
 
@@ -147,9 +146,9 @@ function example_hardware_acceleration(): void
     try {
         $result = $encoder->autoEncode();
 
-        echo "Hardware-accelerated encoding completed!" . PHP_EOL;
+        echo 'Hardware-accelerated encoding completed!'.PHP_EOL;
     } catch (\Exception $e) {
-        echo "Failed: {$e->getMessage()}" . PHP_EOL;
+        echo "Failed: {$e->getMessage()}".PHP_EOL;
     }
 }
 
@@ -168,10 +167,10 @@ function example_vmaf_comparison(): void
             distortedFile: '/path/to/encoded.mp4'
         );
 
-        echo "VMAF Comparison:" . PHP_EOL;
-        echo "  VMAF Score: {$result->getVMAFScore()}" . PHP_EOL;
+        echo 'VMAF Comparison:'.PHP_EOL;
+        echo "  VMAF Score: {$result->getVMAFScore()}".PHP_EOL;
     } catch (\Exception $e) {
-        echo "VMAF calculation failed: {$e->getMessage()}" . PHP_EOL;
+        echo "VMAF calculation failed: {$e->getMessage()}".PHP_EOL;
     }
 }
 
@@ -182,21 +181,17 @@ function example_vmaf_comparison(): void
  */
 function example_event_listening(): void
 {
-    use Foxws\AbAv1\Events\EncodingStarted;
-    use Foxws\AbAv1\Events\EncodingCompleted;
-    use Foxws\AbAv1\Events\EncodingFailed;
-
     // In a service provider or listener
-    EncodingStarted::listen(function (EncodingStarted $event) {
-        echo "Encoding started: {$event->inputPath}" . PHP_EOL;
+    \Foxws\AbAv1\Events\EncodingStarted::listen(function (\Foxws\AbAv1\Events\EncodingStarted $event) {
+        echo "Encoding started: {$event->inputPath}".PHP_EOL;
     });
 
-    EncodingCompleted::listen(function (EncodingCompleted $event) {
-        echo "Encoding completed! VMAF: {$event->result->getVMAFScore()}" . PHP_EOL;
+    \Foxws\AbAv1\Events\EncodingCompleted::listen(function (\Foxws\AbAv1\Events\EncodingCompleted $event) {
+        echo "Encoding completed! VMAF: {$event->result->getVMAFScore()}".PHP_EOL;
     });
 
-    EncodingFailed::listen(function (EncodingFailed $event) {
-        echo "Encoding failed: {$event->exception->getMessage()}" . PHP_EOL;
+    \Foxws\AbAv1\Events\EncodingFailed::listen(function (\Foxws\AbAv1\Events\EncodingFailed $event) {
+        echo "Encoding failed: {$event->exception->getMessage()}".PHP_EOL;
     });
 }
 

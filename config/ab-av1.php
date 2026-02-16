@@ -70,7 +70,7 @@ return [
     /*
     |--------------------------------------------------------------------------
     | FFmpeg Input Options
-    |----------||||
+    |----------
     | Additional FFmpeg input options (e.g., hardware acceleration).
     | Example: ['hwaccel' => 'vaapi', 'hwaccel_output_format' => 'vaapi']
     |
@@ -79,4 +79,23 @@ return [
         // 'hwaccel' => env('AB_AV1_HWACCEL', null),
         // 'hwaccel_output_format' => env('AB_AV1_HWACCEL_OUTPUT_FORMAT', null),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Temporary Files Root
+    |--------------------------------------------------------------------------
+    |
+    | Root directory for temporary files used during encoding.
+    */
+    'temporary_files_root' => env('AB_AV1_TEMPORARY_FILES_ROOT', storage_path('app/ab-av1/temp')),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cache Files Root
+    |--------------------------------------------------------------------------
+    |
+    | Cache storage directory for small files (e.g., RAM disk like /dev/shm).
+    | Set to null to disable and use temporary_files_root for all operations.
+    */
+    'cache_files_root' => env('AB_AV1_CACHE_FILES_ROOT', '/dev/shm'),
 ];

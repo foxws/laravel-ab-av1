@@ -3,7 +3,7 @@
 namespace Foxws\AbAv1\Tests\Feature;
 
 use Foxws\AbAv1\AbAv1;
-use Foxws\AbAv1\Support\Encoder;
+use Foxws\AbAv1\MediaOpener;
 
 it('can resolve ab-av1 from container', function () {
     $abAv1 = app(AbAv1::class);
@@ -11,61 +11,22 @@ it('can resolve ab-av1 from container', function () {
     expect($abAv1)->toBeInstanceOf(AbAv1::class);
 });
 
-it('facade can create encoder', function () {
-    $encoder = AbAv1::encode();
-
-    expect($encoder)->toBeInstanceOf(Encoder::class);
-});
-
-it('can create encoder from service instance', function () {
+it('can create media opener', function () {
     $abAv1 = app(AbAv1::class);
-    $encoder = $abAv1->encoder();
+    $opener = $abAv1->new();
 
-    expect($encoder)->toBeInstanceOf(Encoder::class);
-});
-
-it('can apply default configuration', function () {
-    config()->set('ab-av1.preset', 'medium');
-    config()->set('ab-av1.min_vmaf', 95);
-
-    $abAv1 = app(AbAv1::class);
-    $encoder = $abAv1->withDefaults();
-
-    $args = $encoder->getBuilder()->getArguments();
-
-    expect($args['preset'])->toBe('medium');
-    expect($args['min-vmaf'])->toBe(95.0);
-});
-
-it('applies default encoders from config', function () {
-    config()->set('ab-av1.encoders', ['av1_svtenc', 'av1_vaapi']);
-
-    $abAv1 = app(AbAv1::class);
-    $encoder = $abAv1->withDefaults();
-
-    $args = $encoder->getBuilder()->getArguments();
-
-    expect($args['encoder'])->toBe('av1_svtenc,av1_vaapi');
-});
-
-it('applies default ffmpeg options from config', function () {
-    config()->set('ab-av1.ffmpeg_input_options', [
-        'hwaccel' => 'vaapi',
-    ]);
-
-    $abAv1 = app(AbAv1::class);
-    $encoder = $abAv1->withDefaults();
-
-    $args = $encoder->getBuilder()->getArguments();
-
-    expect($args)->toHaveKey('enc-input-hwaccel');
+    expect($opener)->toBeInstanceOf(MediaOpener::class);
 });
 
 it('respects configured timeout', function () {
     config()->set('ab-av1.timeout', 7200);
 
-    $abAv1 = app(AbAv1::class);
-    $encoder = $abAv1->encoder();
+    // Resolve fresh encoder from container
+    app()->forgetInstance('laravel-ab-av1-configuration');
+    app()->forgetInstance(\Foxws\AbAv1\Support\Encoder::class);
 
-    expect($encoder->getTimeout())->toBe(7200);
+    $abAv1 = app(AbAv1::class);
+    $opener = $abAv1->new();
+
+    expect($opener->getTimeout())->toBe(7200);
 });

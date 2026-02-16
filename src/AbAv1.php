@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Foxws\AbAv1;
 
+use Closure;
 use Foxws\AbAv1\Support\Encoder;
-use Illuminate\Support\Facades\Log;
-use Psr\Log\LoggerInterface;
+use Illuminate\Support\Traits\ForwardsCalls;
 
 /**
  * Main ab-av1 facade wrapper
@@ -15,76 +15,49 @@ use Psr\Log\LoggerInterface;
  */
 class AbAv1
 {
+    use ForwardsCalls;
+
+    protected ?string $defaultDisk = null;
+
+    protected ?Encoder $encoder = null;
+
+    protected ?Closure $encoderResolver = null;
+
     public function __construct(
-        protected ?LoggerInterface $logger = null
+        ?string $defaultDisk = null,
+        ?Encoder $encoder = null,
+        ?Closure $encoderResolver = null
     ) {
-        $this->logger ??= Log::channel(config('ab-av1.log_channel', 'stack'));
+        $this->defaultDisk = $defaultDisk;
+        $this->encoder = $encoder;
+        $this->encoderResolver = $encoderResolver;
     }
 
-    /**
-     * Create a new encoder instance
-     */
-    public function encoder(): Encoder
+    protected function encoder(): Encoder
     {
-        $encoder = Encoder::create($this->logger);
-        $encoder->setTimeout(config('ab-av1.timeout', 3600));
-
-        return $encoder;
-    }
-
-    /**
-     * Create a new encoder with default configuration applied
-     */
-    public function withDefaults(): Encoder
-    {
-        $encoder = $this->encoder();
-
-        // Apply default preset if configured
-        if ($preset = config('ab-av1.preset')) {
-            $encoder->withPreset($preset);
+        if ($this->encoder) {
+            return $this->encoder;
         }
 
-        // Apply default encoders if configured
-        if ($encoders = config('ab-av1.encoders')) {
-            $encoder->withEncoders((array) $encoders);
-        }
+        $resolver = $this->encoderResolver;
 
-        // Apply default min VMAF if configured
-        if ($minVmaf = config('ab-av1.min_vmaf')) {
-            $encoder->withMinVMAF($minVmaf);
-        }
+        return $this->encoder = $resolver();
+    }
 
-        // Apply FFmpeg input options if configured
-        if ($ffmpegOptions = config('ab-av1.ffmpeg_input_options', [])) {
-            $encoder->withFFmpegOptions($ffmpegOptions);
-        }
-
-        return $encoder;
+    public function new(): MediaOpener
+    {
+        return new MediaOpener($this->defaultDisk, $this->encoder());
     }
 
     /**
-     * Fluent encoder creation
+     * Handle dynamic method calls into MediaOpener.
+     *
+     * @param  string  $method
+     * @param  array  $parameters
+     * @return mixed
      */
-    public static function encode(): Encoder
+    public function __call($method, $parameters)
     {
-        return Encoder::create();
-    }
-
-    /**
-     * Get logger instance
-     */
-    public function getLogger(): LoggerInterface
-    {
-        return $this->logger;
-    }
-
-    /**
-     * Set logger instance
-     */
-    public function setLogger(LoggerInterface $logger): self
-    {
-        $this->logger = $logger;
-
-        return $this;
+        return $this->forwardCallTo($this->new(), $method, $parameters);
     }
 }

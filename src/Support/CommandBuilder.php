@@ -90,8 +90,20 @@ class CommandBuilder
         return $this;
     }
 
-    public function withPreset(string $preset): self
+    public function withPreset(int|string $preset): self
     {
+        // Handle numeric presets (0-8 for SVT-AV1)
+        if (is_int($preset)) {
+            if ($preset < 0 || $preset > 8) {
+                throw new \InvalidArgumentException("Numeric preset must be between 0 and 8, got {$preset}");
+            }
+
+            $this->arguments['preset'] = $preset;
+
+            return $this;
+        }
+
+        // Handle string presets (encoder-agnostic names)
         $validPresets = ['ultrafast', 'superfast', 'veryfast', 'faster', 'fast', 'medium', 'slow', 'slower'];
 
         if (! in_array($preset, $validPresets)) {
