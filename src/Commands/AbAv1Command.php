@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Foxws\AbAv1\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class AbAv1Command extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'laravel-ab-av1';
 
     public $description = 'My command';
 
