@@ -136,6 +136,20 @@ class CommandBuilder
         return $this;
     }
 
+    public function withVFrames(int $frames): self
+    {
+        $this->arguments['vframes'] = $frames;
+
+        return $this;
+    }
+
+    public function withSamples(int $samples): self
+    {
+        $this->arguments['samples'] = $samples;
+
+        return $this;
+    }
+
     public function withEncoder(string $encoder): self
     {
         $this->arguments['encoder'] = $encoder;

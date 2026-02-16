@@ -6,9 +6,7 @@ use Foxws\AbAv1\Support\EncodingResult;
 
 it('can parse vmaf score from output', function () {
     $output = <<<'OUTPUT'
-    Processing video...
-    VMAF score: 95.5
-    CRF: 25
+    [2024-01-16T13:40:23Z INFO  ab_av1::command::sample_encode] crf 19 VMAF 95.5 predicted video stream size 186.95 MiB (127%) taking 86 seconds
     OUTPUT;
 
     $result = new EncodingResult('/path/to/video.mp4', $output);
@@ -18,8 +16,7 @@ it('can parse vmaf score from output', function () {
 
 it('can parse crf value from output', function () {
     $output = <<<'OUTPUT'
-    Processing...
-    crf: 32
+    [2024-01-16T13:40:31Z INFO  ab_av1::command::sample_encode] crf 32 VMAF 94.80 predicted video stream size 174.92 MiB (119%) taking 81 seconds
     OUTPUT;
 
     $result = new EncodingResult('/path/to/video.mp4', $output);
@@ -29,8 +26,7 @@ it('can parse crf value from output', function () {
 
 it('can parse estimated size from output', function () {
     $output = <<<'OUTPUT'
-    Encoding complete
-    Estimated encode size: 150 MB
+    [2024-01-16T13:40:23Z INFO  ab_av1::command::sample_encode] crf 19 VMAF 95.03 predicted video stream size 150 MiB (127%) taking 86 seconds
     OUTPUT;
 
     $result = new EncodingResult('/path/to/video.mp4', $output);
@@ -40,8 +36,7 @@ it('can parse estimated size from output', function () {
 
 it('can parse estimated time from output', function () {
     $output = <<<'OUTPUT'
-    Results:
-    Estimated encode time: 2h 30m 45s
+    [2024-01-16T13:40:23Z INFO  ab_av1::command::sample_encode] crf 19 VMAF 95.03 predicted video stream size 186.95 MiB (127%) taking 9045 seconds
     OUTPUT;
 
     $result = new EncodingResult('/path/to/video.mp4', $output);

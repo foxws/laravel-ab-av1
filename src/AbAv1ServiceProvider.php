@@ -46,7 +46,9 @@ class AbAv1ServiceProvider extends PackageServiceProvider
                 'preset' => Config::get('ab-av1.preset', 8),
                 'min_vmaf' => Config::get('ab-av1.min_vmaf', 95),
                 'max_encoded_percent' => Config::get('ab-av1.max_encoded_percent', 200),
-                'encoders' => Config::get('ab-av1.encoders', []),
+                'vframes' => Config::get('ab-av1.vframes'),
+                'samples' => Config::get('ab-av1.samples'),
+                'encoder' => Config::get('ab-av1.encoder'),
                 'ffmpeg_input_options' => Config::get('ab-av1.ffmpeg_input_options', []),
             ];
 
@@ -76,6 +78,18 @@ class AbAv1ServiceProvider extends PackageServiceProvider
             // Apply configuration defaults
             if (isset($config['max_encoded_percent'])) {
                 $encoder->withMaxEncodedPercent($config['max_encoded_percent']);
+            }
+
+            if (! empty($config['vframes'])) {
+                $encoder->withVFrames($config['vframes']);
+            }
+
+            if (! empty($config['samples'])) {
+                $encoder->withSamples($config['samples']);
+            }
+
+            if (! empty($config['encoder'])) {
+                $encoder->withEncoder($config['encoder']);
             }
 
             if (! empty($config['ffmpeg_input_options'])) {

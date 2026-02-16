@@ -189,6 +189,20 @@ class Encoder
         return $this;
     }
 
+    public function withVFrames(int $frames): self
+    {
+        $this->builder->withVFrames($frames);
+
+        return $this;
+    }
+
+    public function withSamples(int $samples): self
+    {
+        $this->builder->withSamples($samples);
+
+        return $this;
+    }
+
     public function withEncoder(string $encoder): self
     {
         $this->builder->withEncoder($encoder);
@@ -391,7 +405,8 @@ class Encoder
                 throw new \RuntimeException("ab-av1 command failed: {$process->errorOutput()}");
             }
 
-            $output = $process->output();
+            // ab-av1 outputs logs to stderr, not stdout
+            $output = $process->errorOutput() ?: $process->output();
             $result = new EncodingResult($this->inputPath ?? 'unknown', $output);
 
             if ($this->outputPath) {
@@ -399,6 +414,12 @@ class Encoder
             }
 
             if ($this->logger) {
+                // Debug: Log raw output to help debug parsing
+                $this->logger->debug('Raw ab-av1 output', [
+                    'stdout' => $process->output(),
+                    'stderr' => $process->errorOutput(),
+                ]);
+
                 $this->logger->info('Encoding completed', [
                     'vmaf_score' => $result->getVMAFScore(),
                     'crf_used' => $result->getCRFUsed(),

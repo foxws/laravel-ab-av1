@@ -44,46 +44,76 @@ class EncodingResult
 
     protected function parseOutput(): void
     {
-        // Parse VMAF score if available
-        if (preg_match('/VMAF score:\s*([\d.]+)/i', $this->rawOutput, $matches)) {
-            $this->vmafScore = (float) $matches[1];
+        // Parse ab-av1 output format: "crf 20 VMAF 94.80 predicted video stream size..."
+        // ab-av1 tests multiple CRF values, so we need to get the last/final one
+
+        // Parse all VMAF scores and get the last one (final chosen value)
+        // Format: "crf 20 VMAF 94.80"
+        if (preg_match_all('/crf\s+\d+\s+VMAF\s+([\d.]+)/i', $this->rawOutput, $matches)) {
+            $this->vmafScore = (float) end($matches[1]);
         }
 
-        // Parse XPSNR score if available
-        if (preg_match('/XPSNR score:\s*([\d.]+)/i', $this->rawOutput, $matches)) {
+        // Parse all CRF values and get the last one (final chosen value)
+        // Format: "crf 20 VMAF 94.80"
+        if (preg_match_all('/crf\s+(\d+)\s+VMAF/i', $this->rawOutput, $matches)) {
+            $this->crfUsed = (int) end($matches[1]);
+        }
+
+        // Parse estimated encode size from ab-av1 output (get last occurrence)
+        // Format: "predicted video stream size 174.92 MiB"
+        if (preg_match_all('/predicted\s+video\s+stream\s+size\s+([\d.]+)\s+([KMGT]?iB)/i', $this->rawOutput, $matches)) {
+            $lastSize = end($matches[1]);
+            $lastUnit = end($matches[2]);
+
+            $this->estimatedSize = $this->parseSizeToBytes($lastSize.$lastUnit);
+        }
+
+        // Parse estimated time from ab-av1 output (get last occurrence)
+        // Format: "taking 81 seconds"
+        if (preg_match_all('/taking\s+(\d+)\s+seconds/i', $this->rawOutput, $matches)) {
+            $this->estimatedTime = (float) end($matches[1]);
+        }
+
+        // Fallback: Parse XPSNR score if available
+        if (preg_match('/XPSNR\s+([\d.]+)/i', $this->rawOutput, $matches)) {
             $this->xpsnrScore = (float) $matches[1];
-        }
-
-        // Parse CRF value if available
-        if (preg_match('/crf:\s*(\d+)/i', $this->rawOutput, $matches)) {
-            $this->crfUsed = (int) $matches[1];
-        }
-
-        // Parse estimated encode size
-        if (preg_match('/estimated.*?size:\s*([\d.]+)\s*([KMGT]?B)/i', $this->rawOutput, $matches)) {
-            $this->estimatedSize = $this->parseSizeToBytes($matches[1].$matches[2]);
-        }
-
-        // Parse estimated time
-        if (preg_match('/estimated.*?time:\s*([^,\n]+)/i', $this->rawOutput, $matches)) {
-            $this->estimatedTime = $this->parseTimeToSeconds($matches[1]);
         }
     }
 
     protected function parseSizeToBytes(string $size): int
     {
-        $size = strtoupper(trim($size));
-        $multipliers = [
-            'TB' => 1024 ** 4,
-            'GB' => 1024 ** 3,
-            'MB' => 1024 ** 2,
-            'KB' => 1024,
+        $size = trim($size);
+
+        // Binary units (IEC standard used by ab-av1)
+        $binaryMultipliers = [
+            'TiB' => 1024 ** 4,
+            'GiB' => 1024 ** 3,
+            'MiB' => 1024 ** 2,
+            'KiB' => 1024,
+        ];
+
+        // Decimal units (SI standard)
+        $decimalMultipliers = [
+            'TB' => 1000 ** 4,
+            'GB' => 1000 ** 3,
+            'MB' => 1000 ** 2,
+            'KB' => 1000,
             'B' => 1,
         ];
 
-        foreach ($multipliers as $unit => $multiplier) {
-            if (str_ends_with($size, $unit)) {
-                $value = (float) substr($size, 0, -strlen($unit));
+        // Try binary units first (ab-av1 uses these)
+        foreach ($binaryMultipliers as $unit => $multiplier) {
+            if (stripos($size, $unit) !== false) {
+                $value = (float) str_ireplace($unit, '', $size);
+
+                return (int) ($value * $multiplier);
+            }
+        }
+
+        // Fallback to decimal units
+        foreach ($decimalMultipliers as $unit => $multiplier) {
+            if (stripos($size, $unit) !== false) {
+                $value = (float) str_ireplace($unit, '', $size);
 
                 return (int) ($value * $multiplier);
             }

@@ -36,14 +36,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Default Encoders
+    | Default Encoder
     |--------------------------------------------------------------------------
     |
-    | Default list of encoders to try (in order).
-    | supports: av1_svtenc, av1_vaapi, libx264, libx265, etc.
+    | Default encoder to use for encoding.
+    | Leave null to use ab-av1's default.
+    | Options: av1_svtenc (CPU), av1_qsv (Intel QuickSync), av1_vaapi (AMD/Intel),
+    |          libx264, libx265, etc.
     |
     */
-    'encoders' => env('AB_AV1_ENCODERS', null),
+    'encoder' => env('AB_AV1_ENCODER', null),
 
     /*
     |--------------------------------------------------------------------------
@@ -69,15 +71,51 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | FFmpeg Input Options
-    |----------
-    | Additional FFmpeg input options (e.g., hardware acceleration).
-    | Example: ['hwaccel' => 'vaapi', 'hwaccel_output_format' => 'vaapi']
+    | Sample Frames
+    |--------------------------------------------------------------------------
+    |
+    | Number of frames to encode per sample (default: 240).
+    | Lower values speed up the search phase.
+    |
+    */
+    'vframes' => env('AB_AV1_VFRAMES', null),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Number of Samples
+    |--------------------------------------------------------------------------
+    |
+    | Number of video samples to take for quality assessment (default: 6).
+    | More samples increase accuracy for varied content.
+    |
+    */
+    'samples' => env('AB_AV1_SAMPLES', null),
+
+    /*
+    |--------------------------------------------------------------------------
+    | FFmpeg Input Options (Hardware Acceleration)
+    |--------------------------------------------------------------------------
+    |
+    | Additional FFmpeg input options for hardware acceleration.
+    | These are passed to ab-av1 via --enc-input flag.
+    |
+    | Intel QuickSync (av1_qsv):
+    |   ['hwaccel' => 'qsv', 'qsv_device' => '/dev/dri/renderD128']
+    |
+    | AMD VA-API (av1_vaapi):
+    |   ['hwaccel' => 'vaapi', 'hwaccel_device' => '/dev/dri/renderD128',
+    |    'hwaccel_output_format' => 'vaapi']
     |
     */
     'ffmpeg_input_options' => [
-        // 'hwaccel' => env('AB_AV1_HWACCEL', null),
-        // 'hwaccel_output_format' => env('AB_AV1_HWACCEL_OUTPUT_FORMAT', null),
+        // Intel QuickSync
+        // 'hwaccel' => 'qsv',
+        // 'qsv_device' => '/dev/dri/renderD128',
+
+        // AMD VA-API
+        // 'hwaccel' => 'vaapi',
+        // 'hwaccel_device' => '/dev/dri/renderD128',
+        // 'hwaccel_output_format' => 'vaapi',
     ],
 
     /*
