@@ -40,7 +40,7 @@ class MediaOpener
         return $this;
     }
 
-    public function path(string $path): self
+    public function open(string $path): self
     {
         $disk = $this->disk ?? Disk::make($this->defaultDisk ?? config('filesystems.default'));
 

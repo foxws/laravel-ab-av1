@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Foxws\AbAv1\Filesystem;
 
+use Foxws\AbAv1\Support\Encoder;
 use Illuminate\Contracts\Filesystem\Filesystem as FilesystemContract;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Export result to configured disk and path
+ * Export result to configured disk and path (like Laravel Streamer)
  */
 class Exporter
 {
@@ -16,13 +17,15 @@ class Exporter
 
     protected ?string $path = null;
 
-    protected string $outputFile;
+    protected ?string $outputFile = null;
 
     protected FilesystemContract $filesystem;
 
-    public function __construct(string $outputFile)
+    protected Encoder $encoder;
+
+    public function __construct(Encoder $encoder)
     {
-        $this->outputFile = $outputFile;
+        $this->encoder = $encoder;
     }
 
     /**
@@ -48,6 +51,7 @@ class Exporter
 
     /**
      * Save the encoded file to the configured disk and path
+     * This triggers the actual encoding (like Laravel Streamer)
      */
     public function save(): bool
     {
@@ -55,21 +59,34 @@ class Exporter
             throw new \RuntimeException('Disk and path must be set before saving');
         }
 
-        if (! file_exists($this->outputFile)) {
-            throw new \RuntimeException("Output file not found: {$this->outputFile}");
+        try {
+            // Generate temporary output file
+            $tempDir = $this->encoder->getTemporaryDirectories()->create();
+            $this->outputFile = $tempDir.'/output.mp4';
+
+            // Set output on encoder and execute encoding
+            $this->encoder->withOutput($this->outputFile);
+            $this->encoder->autoEncode();
+
+            if (! file_exists($this->outputFile)) {
+                throw new \RuntimeException('Encoding failed: output file not found');
+            }
+
+            // Ensure directory exists
+            $directory = dirname($this->path);
+            if ($directory !== '.') {
+                $this->filesystem->makeDirectory($directory, 0755, true, true);
+            }
+
+            // Copy file to destination
+            $contents = file_get_contents($this->outputFile);
+            $this->filesystem->put($this->path, $contents);
+
+            return true;
+        } finally {
+            // Always cleanup temporary files
+            $this->encoder->cleanupTemporaryFiles();
         }
-
-        // Ensure directory exists
-        $directory = dirname($this->path);
-        if ($directory !== '.') {
-            $this->filesystem->makeDirectory($directory, 0755, true, true);
-        }
-
-        // Copy file to destination
-        $contents = file_get_contents($this->outputFile);
-        $this->filesystem->put($this->path, $contents);
-
-        return true;
     }
 
     /**

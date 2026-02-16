@@ -43,7 +43,7 @@ return [
     | supports: av1_svtenc, av1_vaapi, libx264, libx265, etc.
     |
     */
-    'encoders' => env('AB_AV1_ENCODERS', ''),
+    'encoders' => env('AB_AV1_ENCODERS', null),
 
     /*
     |--------------------------------------------------------------------------
@@ -65,7 +65,7 @@ return [
     | Used to prevent oversized encodes.
     |
     */
-    'max_encoded_percent' => env('AB_AV1_MAX_ENCODED_PERCENT', 150),
+    'max_encoded_percent' => env('AB_AV1_MAX_ENCODED_PERCENT', 200),
 
     /*
     |--------------------------------------------------------------------------

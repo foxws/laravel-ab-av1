@@ -334,15 +334,20 @@ class Encoder
     }
 
     /**
-     * Create an exporter for saving encoded files
+     * Create an exporter for saving encoded files (like Laravel Streamer)
+     * Automatically creates temporary output file
      */
     public function export(): Exporter
     {
-        if (! $this->outputPath) {
-            throw new \RuntimeException('Output path must be set before export. Use withOutput() first.');
-        }
+        return new Exporter($this);
+    }
 
-        return new Exporter($this->outputPath);
+    /**
+     * Get temporary directories instance
+     */
+    public function getTemporaryDirectories(): TemporaryDirectories
+    {
+        return $this->temporaryDirectories;
     }
 
     /**

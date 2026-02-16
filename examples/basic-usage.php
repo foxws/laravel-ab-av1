@@ -69,7 +69,7 @@ function example_crf_search(): void
         ->withInput('/path/to/video.mp4')
         ->withPreset('medium')
         ->withMinVMAF(95)
-        ->withMaxEncodedPercent(150);
+        ->withMaxEncodedPercent(200);
 
     try {
         $result = $encoder->crfSearch();

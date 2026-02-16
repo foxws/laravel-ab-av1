@@ -45,7 +45,7 @@ class AbAv1ServiceProvider extends PackageServiceProvider
                 'timeout' => Config::integer('ab-av1.timeout', 3600),
                 'preset' => Config::get('ab-av1.preset', 8),
                 'min_vmaf' => Config::get('ab-av1.min_vmaf', 95),
-                'max_encoded_percent' => Config::get('ab-av1.max_encoded_percent', 150),
+                'max_encoded_percent' => Config::get('ab-av1.max_encoded_percent', 200),
                 'encoders' => Config::get('ab-av1.encoders', []),
                 'ffmpeg_input_options' => Config::get('ab-av1.ffmpeg_input_options', []),
             ];
@@ -71,7 +71,18 @@ class AbAv1ServiceProvider extends PackageServiceProvider
             $config = $app->make('laravel-ab-av1-configuration');
             $tempDirs = $app->make(TemporaryDirectories::class);
 
-            return Encoder::create($logger, $tempDirs, $config['timeout']);
+            $encoder = Encoder::create($logger, $tempDirs, $config['timeout']);
+
+            // Apply configuration defaults
+            if (isset($config['max_encoded_percent'])) {
+                $encoder->withMaxEncodedPercent($config['max_encoded_percent']);
+            }
+
+            if (! empty($config['ffmpeg_input_options'])) {
+                $encoder->withFFmpegOptions($config['ffmpeg_input_options']);
+            }
+
+            return $encoder;
         });
 
         // Register the main class to use with the facade
