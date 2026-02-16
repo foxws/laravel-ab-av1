@@ -49,6 +49,50 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Encoder Arguments
+    |--------------------------------------------------------------------------
+    |
+    | Additional arguments to pass directly to the encoder via --enc flag.
+    | Example: 'look_ahead=1' for hardware encoder lookahead.
+    |
+    */
+    'encoder_args' => env('AB_AV1_ENCODER_ARGS', null),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pixel Format
+    |--------------------------------------------------------------------------
+    |
+    | Pixel format for encoding.
+    | Default: yuv420p10le (10-bit) for AV1, yuv420p (8-bit) for hardware.
+    |
+    */
+    'pix_format' => env('AB_AV1_PIX_FORMAT', null),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Video Filter
+    |--------------------------------------------------------------------------
+    |
+    | FFmpeg video filter to apply before encoding.
+    | Example: 'scale=1920:1080' to resize video.
+    |
+    */
+    'video_filter' => env('AB_AV1_VIDEO_FILTER', null),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Verbosity
+    |--------------------------------------------------------------------------
+    |
+    | Logging verbosity level (0=normal, 1=-v, 2=-vv).
+    | Higher values show per-sample VMAF and ffmpeg commands.
+    |
+    */
+    'verbosity' => env('AB_AV1_VERBOSITY', 0),
+
+    /*
+    |--------------------------------------------------------------------------
     | Default Minimum VMAF
     |--------------------------------------------------------------------------
     |

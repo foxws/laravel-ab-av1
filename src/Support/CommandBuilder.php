@@ -157,6 +157,38 @@ class CommandBuilder
         return $this;
     }
 
+    public function withEncoderArgs(string $args): self
+    {
+        $this->arguments['enc'] = $args;
+
+        return $this;
+    }
+
+    public function withPixelFormat(string $format): self
+    {
+        $this->arguments['pix-format'] = $format;
+
+        return $this;
+    }
+
+    public function withVideoFilter(string $filter): self
+    {
+        $this->arguments['vfilter'] = $filter;
+
+        return $this;
+    }
+
+    public function withVerbosity(int $level = 1): self
+    {
+        if ($level === 1) {
+            $this->arguments['v'] = true;
+        } elseif ($level >= 2) {
+            $this->arguments['vv'] = true;
+        }
+
+        return $this;
+    }
+
     public function withEncoders(array $encoders): self
     {
         // Store as comma-separated if multiple

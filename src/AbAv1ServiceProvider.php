@@ -49,6 +49,10 @@ class AbAv1ServiceProvider extends PackageServiceProvider
                 'vframes' => Config::get('ab-av1.vframes'),
                 'samples' => Config::get('ab-av1.samples'),
                 'encoder' => Config::get('ab-av1.encoder'),
+                'encoder_args' => Config::get('ab-av1.encoder_args'),
+                'pix_format' => Config::get('ab-av1.pix_format'),
+                'video_filter' => Config::get('ab-av1.video_filter'),
+                'verbosity' => Config::get('ab-av1.verbosity', 0),
                 'ffmpeg_input_options' => Config::get('ab-av1.ffmpeg_input_options', []),
             ];
 
@@ -90,6 +94,22 @@ class AbAv1ServiceProvider extends PackageServiceProvider
 
             if (! empty($config['encoder'])) {
                 $encoder->withEncoder($config['encoder']);
+            }
+
+            if (! empty($config['encoder_args'])) {
+                $encoder->withEncoderArgs($config['encoder_args']);
+            }
+
+            if (! empty($config['pix_format'])) {
+                $encoder->withPixelFormat($config['pix_format']);
+            }
+
+            if (! empty($config['video_filter'])) {
+                $encoder->withVideoFilter($config['video_filter']);
+            }
+
+            if (! empty($config['verbosity'])) {
+                $encoder->withVerbosity($config['verbosity']);
             }
 
             if (! empty($config['ffmpeg_input_options'])) {

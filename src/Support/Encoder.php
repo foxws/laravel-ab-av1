@@ -210,6 +210,34 @@ class Encoder
         return $this;
     }
 
+    public function withEncoderArgs(string $args): self
+    {
+        $this->builder->withEncoderArgs($args);
+
+        return $this;
+    }
+
+    public function withPixelFormat(string $format): self
+    {
+        $this->builder->withPixelFormat($format);
+
+        return $this;
+    }
+
+    public function withVideoFilter(string $filter): self
+    {
+        $this->builder->withVideoFilter($filter);
+
+        return $this;
+    }
+
+    public function withVerbosity(int $level = 1): self
+    {
+        $this->builder->withVerbosity($level);
+
+        return $this;
+    }
+
     public function withEncoders(array $encoders): self
     {
         $this->builder->withEncoders($encoders);
