@@ -28,46 +28,30 @@ class AbAv1ServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
+        // Register configuration singleton (must be first)
+        $this->app->singleton('laravel-ab-av1-configuration', function () {
+            return Config::get('ab-av1', []);
+        });
+
         // Register logger singleton
-        $this->app->singleton('laravel-ab-av1-logger', function () {
-            $logChannel = Config::get('ab-av1.log_channel');
+        $this->app->singleton('laravel-ab-av1-logger', function ($app) {
+            $config = $app->make('laravel-ab-av1-configuration');
+            $logChannel = $config['log_channel'] ?? null;
 
             if ($logChannel === false) {
                 return null;
             }
 
-            return app('log')->channel($logChannel ?: Config::get('logging.default'));
-        });
-
-        // Register configuration singleton
-        $this->app->singleton('laravel-ab-av1-configuration', function () {
-            $baseConfig = [
-                'timeout' => Config::integer('ab-av1.timeout', 3600),
-                'preset' => Config::get('ab-av1.preset', 8),
-                'min_vmaf' => Config::get('ab-av1.min_vmaf', 95),
-                'max_encoded_percent' => Config::get('ab-av1.max_encoded_percent', 200),
-                'vframes' => Config::get('ab-av1.vframes'),
-                'samples' => Config::get('ab-av1.samples'),
-                'encoder' => Config::get('ab-av1.encoder'),
-                'encoder_args' => Config::get('ab-av1.encoder_args'),
-                'pix_format' => Config::get('ab-av1.pix_format'),
-                'video_filter' => Config::get('ab-av1.video_filter'),
-                'verbosity' => Config::get('ab-av1.verbosity', 0),
-                'ffmpeg_input_options' => Config::get('ab-av1.ffmpeg_input_options', []),
-            ];
-
-            if ($configuredTemporaryRoot = Config::string('ab-av1.temporary_files_root', '')) {
-                $baseConfig['temporary_directory'] = $configuredTemporaryRoot;
-            }
-
-            return $baseConfig;
+            return app('log')->channel($logChannel ?: config('logging.default'));
         });
 
         // Register TemporaryDirectories singleton
-        $this->app->singleton(TemporaryDirectories::class, function () {
+        $this->app->singleton(TemporaryDirectories::class, function ($app) {
+            $config = $app->make('laravel-ab-av1-configuration');
+
             return new TemporaryDirectories(
-                Config::string('ab-av1.temporary_files_root', storage_path('app/ab-av1/temp')),
-                Config::string('ab-av1.cache_files_root', '') ?: null,
+                $config['temporary_files_root'] ?? storage_path('app/ab-av1/temp'),
+                $config['cache_files_root'] ?? null,
             );
         });
 
@@ -77,42 +61,42 @@ class AbAv1ServiceProvider extends PackageServiceProvider
             $config = $app->make('laravel-ab-av1-configuration');
             $tempDirs = $app->make(TemporaryDirectories::class);
 
-            $encoder = Encoder::create($logger, $tempDirs, $config['timeout']);
+            $encoder = Encoder::create($logger, $tempDirs, $config['timeout'] ?? 3600);
 
             // Apply configuration defaults
-            if (isset($config['max_encoded_percent'])) {
+            if (filled($config['max_encoded_percent'] ?? null)) {
                 $encoder->withMaxEncodedPercent($config['max_encoded_percent']);
             }
 
-            if (! empty($config['vframes'])) {
+            if (filled($config['vframes'] ?? null)) {
                 $encoder->withVFrames($config['vframes']);
             }
 
-            if (! empty($config['samples'])) {
+            if (filled($config['samples'] ?? null)) {
                 $encoder->withSamples($config['samples']);
             }
 
-            if (! empty($config['encoder'])) {
+            if (filled($config['encoder'] ?? null)) {
                 $encoder->withEncoder($config['encoder']);
             }
 
-            if (! empty($config['encoder_args'])) {
+            if (filled($config['encoder_args'] ?? null)) {
                 $encoder->withEncoderArgs($config['encoder_args']);
             }
 
-            if (! empty($config['pix_format'])) {
+            if (filled($config['pix_format'] ?? null)) {
                 $encoder->withPixelFormat($config['pix_format']);
             }
 
-            if (! empty($config['video_filter'])) {
+            if (filled($config['video_filter'] ?? null)) {
                 $encoder->withVideoFilter($config['video_filter']);
             }
 
-            if (! empty($config['verbosity'])) {
+            if (filled($config['verbosity'] ?? null)) {
                 $encoder->withVerbosity($config['verbosity']);
             }
 
-            if (! empty($config['ffmpeg_input_options'])) {
+            if (filled($config['ffmpeg_input_options'] ?? null)) {
                 $encoder->withFFmpegOptions($config['ffmpeg_input_options']);
             }
 
@@ -120,9 +104,11 @@ class AbAv1ServiceProvider extends PackageServiceProvider
         });
 
         // Register the main class to use with the facade
-        $this->app->singleton('ab-av1', function () {
+        $this->app->singleton('ab-av1', function ($app) {
+            $config = $app->make('laravel-ab-av1-configuration');
+
             return new AbAv1(
-                Config::string('filesystems.default'),
+                $config['default_disk'] ?? config('filesystems.default'),
                 null,
                 fn () => app(Encoder::class)
             );
