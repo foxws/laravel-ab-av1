@@ -378,7 +378,12 @@ class Encoder
         $startTime = microtime(true);
 
         try {
-            $process = Process::timeout($this->timeout)->run($command);
+            // Change to output directory to prevent temp files in project root
+            $workingDirectory = $this->outputPath ? dirname($this->outputPath) : null;
+
+            $process = Process::timeout($this->timeout)
+                ->path($workingDirectory)
+                ->run($command);
 
             $executionTime = microtime(true) - $startTime;
 
