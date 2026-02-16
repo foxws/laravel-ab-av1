@@ -50,9 +50,56 @@ class Encoder
         $this->timeout = $timeout ?? 3600;
     }
 
-    public static function create(?LoggerInterface $logger = null, ?TemporaryDirectories $temporaryDirectories = null, ?int $timeout = null): self
+    public static function create(?LoggerInterface $logger = null, ?TemporaryDirectories $temporaryDirectories = null, ?int $timeout = null, array $config = []): self
     {
-        return new self($logger, $temporaryDirectories, $timeout);
+        $encoder = new self($logger, $temporaryDirectories, $timeout);
+
+        // Apply configuration defaults
+        if (filled($config['preset'] ?? null)) {
+            $encoder->withPreset($config['preset']);
+        }
+
+        if (filled($config['min_vmaf'] ?? null)) {
+            $encoder->withMinVMAF($config['min_vmaf']);
+        }
+
+        if (filled($config['max_encoded_percent'] ?? null)) {
+            $encoder->withMaxEncodedPercent($config['max_encoded_percent']);
+        }
+
+        if (filled($config['vframes'] ?? null)) {
+            $encoder->withVFrames($config['vframes']);
+        }
+
+        if (filled($config['samples'] ?? null)) {
+            $encoder->withSamples($config['samples']);
+        }
+
+        if (filled($config['encoder'] ?? null)) {
+            $encoder->withEncoder($config['encoder']);
+        }
+
+        if (filled($config['encoder_args'] ?? null)) {
+            $encoder->withEncoderArgs($config['encoder_args']);
+        }
+
+        if (filled($config['pix_format'] ?? null)) {
+            $encoder->withPixelFormat($config['pix_format']);
+        }
+
+        if (filled($config['video_filter'] ?? null)) {
+            $encoder->withVideoFilter($config['video_filter']);
+        }
+
+        if (filled($config['verbosity'] ?? null)) {
+            $encoder->withVerbosity($config['verbosity']);
+        }
+
+        if (filled($config['ffmpeg_input_options'] ?? null)) {
+            $encoder->withFFmpegOptions($config['ffmpeg_input_options']);
+        }
+
+        return $encoder;
     }
 
     /**
