@@ -2,9 +2,9 @@
 
 namespace Foxws\AbAv1;
 
+use Foxws\AbAv1\Commands\AbAv1Command;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Foxws\AbAv1\Commands\AbAv1Command;
 
 class AbAv1ServiceProvider extends PackageServiceProvider
 {

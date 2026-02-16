@@ -2,9 +2,9 @@
 
 namespace Foxws\AbAv1\Tests;
 
+use Foxws\AbAv1\AbAv1ServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Foxws\AbAv1\AbAv1ServiceProvider;
 
 class TestCase extends Orchestra
 {
