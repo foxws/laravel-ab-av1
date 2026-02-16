@@ -74,12 +74,14 @@ class Exporter
 
             // Ensure directory exists
             $directory = dirname($this->path);
+
             if ($directory !== '.') {
                 $this->filesystem->makeDirectory($directory, 0755, true, true);
             }
 
             // Copy file to destination
             $contents = file_get_contents($this->outputFile);
+
             $this->filesystem->put($this->path, $contents);
 
             return true;
