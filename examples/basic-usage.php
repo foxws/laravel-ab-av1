@@ -238,3 +238,30 @@ function example_domain_integration(): void
         throw $e;
     }
 }
+/**
+ * Example 9: Hardware encoder with encoder args
+ *
+ * Use Intel QuickSync (av1_qsv) with custom encoder parameters
+ */
+function example_quicksync_with_args(): void
+{
+    $encoder = AbAv1::encode()
+        ->withInput('/path/to/video.mp4')
+        ->withOutput('/path/to/output.mp4')
+        ->withPreset('slow')  // You can use string or numeric (0-8)
+        ->withEncoder('av1_qsz')
+        // FFmpeg input options (hardware acceleration)
+        ->withFFmpegOptions('hwaccel=qsv qsv_device=/dev/dri/renderD128')
+        // Encoder-specific options via --enc flag (colon-separated parameters)
+        ->withEncoderArgs('av1_qsz_params=preset=slow:lookahead=1:lookahead_depth=60:extbrc=1')
+        ->withMinVMAF(95);
+
+    try {
+        $result = $encoder->autoEncode();
+
+        echo 'QuickSync encoding completed!'.PHP_EOL;
+        echo "VMAF Score: {$result->getVMAFScore()}".PHP_EOL;
+    } catch (\Exception $e) {
+        echo "Failed: {$e->getMessage()}".PHP_EOL;
+    }
+}

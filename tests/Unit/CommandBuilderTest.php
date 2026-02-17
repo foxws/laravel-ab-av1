@@ -87,3 +87,40 @@ it('can convert to string', function () {
 
     expect($command)->toContain('ab-av1 auto-encode');
 });
+
+it('can set numeric preset (0-8)', function () {
+    $command = CommandBuilder::make()
+        ->withPreset(4)
+        ->build();
+
+    expect($command)->toContain('--preset');
+    expect($command)->toContain('4');
+});
+
+it('can set string preset', function () {
+    $command = CommandBuilder::make()
+        ->withPreset('slow')
+        ->build();
+
+    expect($command)->toContain('--preset');
+    expect($command)->toContain('slow');
+});
+
+it('validates numeric preset range', function () {
+    CommandBuilder::make()->withPreset(9);
+})->throws(\InvalidArgumentException::class);
+
+it('can set encoder args', function () {
+    $command = CommandBuilder::make()
+        ->crfSearch()
+        ->withInput('/path/to/video.mp4')
+        ->withEncoder('av1_qsz')
+        ->withEncoderArgs('av1_qsz_params=preset=slow:lookahead=1:lookahead_depth=60:extbrc=1')
+        ->build();
+
+    expect($command)->toContain('crf-search');
+    expect($command)->toContain('--encoder');
+    expect($command)->toContain('av1_qsz');
+    expect($command)->toContain('--enc');
+    expect($command)->toContain('av1_qsz_params=preset=slow:lookahead=1:lookahead_depth=60:extbrc=1');
+});

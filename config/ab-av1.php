@@ -89,7 +89,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | Additional arguments to pass directly to the encoder via --enc flag.
-    | Example: 'look_ahead=1' for hardware encoder lookahead.
+    | Example: 'av1_qsv_params=preset=slow:lookahead=1:lookahead_depth=60:extbrc=1'
     |
     */
     'encoder_args' => env('AB_AV1_ENCODER_ARGS', null),
