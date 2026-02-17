@@ -40,8 +40,6 @@ class Encoder
 
     protected ?TemporaryDirectories $temporaryDirectories = null;
 
-    protected array $ffmpegOptions = [];
-
     public function __construct(?LoggerInterface $logger = null, ?TemporaryDirectories $temporaryDirectories = null, ?int $timeout = null)
     {
         $this->logger = $logger;
@@ -292,19 +290,22 @@ class Encoder
         return $this;
     }
 
-    public function withFFmpegOption(string $key, mixed $value): self
+    public function withFFmpegOptions(string $options): self
     {
-        $this->ffmpegOptions[$key] = $value;
-        $this->builder->withOption("enc-input-{$key}", $value);
+        // Parse space-separated FFmpeg input options
+        // Example: "hwaccel=vaapi hwaccel_output_format=vaapi"
+        // Results in: --enc-input hwaccel=vaapi --enc-input hwaccel_output_format=vaapi
+        $encInputOptions = preg_split('/\s+/', trim($options), -1, PREG_SPLIT_NO_EMPTY);
 
-        return $this;
-    }
+        // Merge with existing enc-input options instead of overwriting
+        $existing = $this->builder->getArguments()['enc-input'] ?? [];
 
-    public function withFFmpegOptions(array $options): self
-    {
-        foreach ($options as $key => $value) {
-            $this->withFFmpegOption($key, $value);
+        if (! is_array($existing)) {
+            $existing = [$existing];
         }
+
+        $merged = array_merge($existing, $encInputOptions);
+        $this->builder->withOption('enc-input', $merged);
 
         return $this;
     }

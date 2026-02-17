@@ -259,6 +259,19 @@ class CommandBuilder
                 if ($value) {
                     $parts[] = "--{$key}";
                 }
+            } elseif (is_array($value)) {
+                // Handle repeatable flags (e.g., --enc-input can appear multiple times)
+                $key = Str::kebab($key);
+                foreach ($value as $item) {
+                    $stringValue = (string) $item;
+
+                    // Only escape if the value contains spaces or special characters
+                    if (preg_match('/[\s"\'$`\\\\|&;<>()]/', $stringValue)) {
+                        $stringValue = escapeshellarg($stringValue);
+                    }
+
+                    $parts[] = "--{$key} {$stringValue}";
+                }
             } elseif ($value !== null) {
                 // Convert keys to kebab-case for CLI compatibility
                 $key = Str::kebab($key);

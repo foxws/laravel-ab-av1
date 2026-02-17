@@ -20,6 +20,16 @@ return [
     | The default timeout (in seconds) for encoding operations.
     | Encodings can take a very long time, so adjust based on your needs.
     |
+    | Default: 14400 seconds (4 hours)
+    |
+    | Typical encoding times for 1080p content:
+    | - 1 hour video @ preset 4: 2-6 hours (depending on CPU/GPU)
+    | - 1 hour video @ preset 6: 1-3 hours
+    | - 1 hour video @ preset 8: 30min-2 hours
+    |
+    | Hardware encoders (av1_qsv, av1_vaapi) are significantly faster.
+    | Adjust timeout based on your hardware and typical video length.
+    |
     */
     'timeout' => env('AB_AV1_TIMEOUT', 14400),
 
@@ -29,10 +39,19 @@ return [
     |--------------------------------------------------------------------------
     |
     | The default encoding preset to use.
-    | Options: 0 (slowest, best quality) to 8 (fastest, lowest quality).
+    | Range: 0 (slowest, best quality/compression) to 8 (fastest, lowest quality)
+    |
+    | Recommended presets:
+    | - 0-2: Very slow, best compression (for archival)
+    | - 3-4: Slow, excellent compression (good for 1080p, recommended)
+    | - 5-6: Medium speed, good compression (balanced)
+    | - 7-8: Fast, lower compression (for quick encodes)
+    |
+    | Preset 4 offers excellent quality-to-speed ratio for 1080p content.
+    | Lower presets take significantly longer but yield smaller files.
     |
     */
-    'preset' => env('AB_AV1_PRESET', 8),
+    'preset' => env('AB_AV1_PRESET', 4),
 
     /*
     |--------------------------------------------------------------------------
@@ -97,10 +116,21 @@ return [
     |--------------------------------------------------------------------------
     |
     | Default VMAF quality target for auto-encode.
-    | Range: 0-100, typical values 75-95
+    | Range: 0-100 (higher = better quality, larger file size)
+    |
+    | Recommended values by use case:
+    | - 95+: Near-transparent quality, large files
+    | - 90-94: Excellent quality, good balance (recommended for 1080p)
+    | - 85-89: High quality, smaller files
+    | - 80-84: Good quality, noticeable compression
+    | - 75-79: Acceptable for most content
+    |
+    | For 1080p content, 90 provides excellent quality with good compression.
+    | Lower resolution content may need higher VMAF scores for the same
+    | perceived quality. Higher resolutions (4K) can use lower VMAF values.
     |
     */
-    'min_vmaf' => env('AB_AV1_MIN_VMAF', 95),
+    'min_vmaf' => env('AB_AV1_MIN_VMAF', 90),
 
     /*
     |--------------------------------------------------------------------------
@@ -118,8 +148,15 @@ return [
     | Sample Frames
     |--------------------------------------------------------------------------
     |
-    | Number of frames to encode per sample (default: 240).
-    | Lower values speed up the search phase.
+    | Number of frames to encode per sample (default: 240, ~10 seconds at 24fps).
+    | Lower values speed up the CRF search phase but may be less accurate.
+    |
+    | Recommended values:
+    | - 240: Default, good balance (10 seconds @ 24fps, 8 seconds @ 30fps)
+    | - 120-180: Faster search, still accurate for most content
+    | - 60-100: Quick testing, less accurate
+    |
+    | For 1080p content, 240 frames provides reliable quality assessment.
     |
     */
     'vframes' => env('AB_AV1_VFRAMES', null),
@@ -130,7 +167,16 @@ return [
     |--------------------------------------------------------------------------
     |
     | Number of video samples to take for quality assessment (default: 6).
-    | More samples increase accuracy for varied content.
+    | More samples increase accuracy for varied content but slow down encoding.
+    |
+    | Recommended values:
+    | - 6: Default, good for most content
+    | - 8-10: Better accuracy for content with varied scenes (recommended for 1080p)
+    | - 4-5: Faster, suitable for uniform content
+    | - 12+: Maximum accuracy, very slow
+    |
+    | For 1080p with mixed scenes (action, dialogue, etc.), 8-10 samples
+    | provide better quality consistency across the entire video.
     |
     */
     'samples' => env('AB_AV1_SAMPLES', null),
@@ -141,26 +187,23 @@ return [
     |--------------------------------------------------------------------------
     |
     | Additional FFmpeg input options for hardware acceleration.
-    | These are passed to ab-av1 via --enc-input flag.
+    | These are passed to ab-av1 via repeated --enc-input flags.
     |
+    | Specify as a space-separated string in .env:
+    |   AB_AV1_FFMPEG_INPUT_OPTIONS="hwaccel=vaapi hwaccel_output_format=vaapi"
+    |
+    | This will generate:
+    |   --enc-input hwaccel=vaapi --enc-input hwaccel_output_format=vaapi
+    |
+    | Examples:
     | Intel QuickSync (av1_qsv):
-    |   ['hwaccel' => 'qsv', 'qsv_device' => '/dev/dri/renderD128']
+    |   "hwaccel=qsv qsv_device=/dev/dri/renderD128"
     |
     | AMD VA-API (av1_vaapi):
-    |   ['hwaccel' => 'vaapi', 'hwaccel_device' => '/dev/dri/renderD128',
-    |    'hwaccel_output_format' => 'vaapi']
+    |   "hwaccel=vaapi hwaccel_device=/dev/dri/renderD128 hwaccel_output_format=vaapi"
     |
     */
-    'ffmpeg_input_options' => [
-        // Intel QuickSync
-        // 'hwaccel' => 'qsv',
-        // 'qsv_device' => '/dev/dri/renderD128',
-
-        // AMD VA-API
-        // 'hwaccel' => 'vaapi',
-        // 'hwaccel_device' => '/dev/dri/renderD128',
-        // 'hwaccel_output_format' => 'vaapi',
-    ],
+    'ffmpeg_input_options' => env('AB_AV1_FFMPEG_INPUT_OPTIONS', null),
 
     /*
     |--------------------------------------------------------------------------
