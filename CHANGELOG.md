@@ -1,3 +1,16 @@
 # Changelog
 
 All notable changes to `laravel-ab-av1` will be documented in this file.
+
+## 0.1.0 - 2026-02-17
+
+### What's Changed
+
+* Initial commit by @francoism90 in https://github.com/foxws/laravel-ab-av1/pull/1
+* feat: Add ab-av1 encoding support  by @francoism90 in https://github.com/foxws/laravel-ab-av1/pull/2
+
+### New Contributors
+
+* @francoism90 made their first contribution in https://github.com/foxws/laravel-ab-av1/pull/1
+
+**Full Changelog**: https://github.com/foxws/laravel-ab-av1/commits/0.1.0
