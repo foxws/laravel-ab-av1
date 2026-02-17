@@ -28,7 +28,7 @@ class Encoder
 
     protected ?LoggerInterface $logger;
 
-    protected int $timeout = 3600;
+    protected int $timeout = 14400;
 
     protected ?string $inputPath = null;
 
@@ -47,7 +47,7 @@ class Encoder
         $this->logger = $logger;
         $this->builder = CommandBuilder::make();
         $this->temporaryDirectories = $temporaryDirectories ?? app(TemporaryDirectories::class);
-        $this->timeout = $timeout ?? 3600;
+        $this->timeout = $timeout ?? 14400;
     }
 
     public static function create(?LoggerInterface $logger = null, ?TemporaryDirectories $temporaryDirectories = null, ?int $timeout = null, array $config = []): self

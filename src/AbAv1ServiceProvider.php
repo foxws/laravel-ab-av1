@@ -64,7 +64,7 @@ class AbAv1ServiceProvider extends PackageServiceProvider
             return Encoder::create(
                 logger: $logger,
                 temporaryDirectories: $tempDirs,
-                timeout: $config['timeout'] ?? 3600,
+                timeout: $config['timeout'] ?? 14400,
                 config: $config
             );
         });

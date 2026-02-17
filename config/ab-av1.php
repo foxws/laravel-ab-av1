@@ -21,7 +21,7 @@ return [
     | Encodings can take a very long time, so adjust based on your needs.
     |
     */
-    'timeout' => env('AB_AV1_TIMEOUT', 3600),
+    'timeout' => env('AB_AV1_TIMEOUT', 14400),
 
     /*
     |--------------------------------------------------------------------------

@@ -53,7 +53,7 @@ class AbAv1Command extends Command
         }
 
         // Configuration details
-        $timeout = Config::get('ab-av1.timeout', 3600);
+        $timeout = Config::get('ab-av1.timeout', 14400);
         $preset = Config::get('ab-av1.preset', 8);
         $minVmaf = Config::get('ab-av1.min_vmaf', 95);
         $maxEncodedPercent = Config::get('ab-av1.max_encoded_percent', 200);
