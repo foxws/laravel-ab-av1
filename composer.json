@@ -1,10 +1,14 @@
 {
     "name": "foxws/laravel-ab-av1",
-    "description": "This is my package laravel-ab-av1",
+    "description": "A Laravel package for encoding videos to AV1 format using ab-av1.",
     "keywords": [
-        "Foxws",
+        "foxws",
         "laravel",
-        "laravel-ab-av1"
+        "ab-av1",
+        "av1",
+        "video",
+        "encoding",
+        "ffmpeg"
     ],
     "homepage": "https://github.com/foxws/laravel-ab-av1",
     "license": "MIT",
@@ -30,13 +34,11 @@
         "pestphp/pest-plugin-laravel": "^4.0",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan-deprecation-rules": "^2.0",
-        "phpstan/phpstan-phpunit": "^2.0",
-        "spatie/laravel-ray": "^1.35"
+        "phpstan/phpstan-phpunit": "^2.0"
     },
     "autoload": {
         "psr-4": {
-            "Foxws\\AbAv1\\": "src/",
-            "Foxws\\AbAv1\\Database\\Factories\\": "database/factories/"
+            "Foxws\\AbAv1\\": "src/"
         }
     },
     "autoload-dev": {
