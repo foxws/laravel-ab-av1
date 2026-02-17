@@ -12,6 +12,7 @@ use Foxws\AbAv1\Exceptions\InvalidEncodingConfigurationException;
 use Foxws\AbAv1\Filesystem\Exporter;
 use Foxws\AbAv1\Filesystem\TemporaryDirectories;
 use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use Psr\Log\LoggerInterface;
@@ -290,8 +291,15 @@ class Encoder
         return $this;
     }
 
-    public function withFFmpegOptions(string $options): self
+    public function withFFmpegOptions(array|string $options): self
     {
+        // Convert array format to space-separated string
+        if (is_array($options)) {
+            $options = Collection::make($options)
+                ->map(fn ($value, $key) => "{$key}={$value}")
+                ->implode(' ');
+        }
+
         // Parse space-separated FFmpeg input options
         // Example: "hwaccel=vaapi hwaccel_output_format=vaapi"
         // Results in: --enc-input hwaccel=vaapi --enc-input hwaccel_output_format=vaapi

@@ -65,8 +65,10 @@ it('can set ffmpeg options', function () {
     ]);
 
     $args = $encoder->getBuilder()->getArguments();
-    expect($args)->toHaveKey('enc-input-hwaccel');
-    expect($args)->toHaveKey('enc-input-hwaccel_output_format');
+    expect($args)->toHaveKey('enc-input');
+    expect($args['enc-input'])->toBeArray();
+    expect($args['enc-input'])->toContain('hwaccel=vaapi');
+    expect($args['enc-input'])->toContain('hwaccel_output_format=vaapi');
 });
 
 it('validates auto-encode configuration - missing input', function () {
