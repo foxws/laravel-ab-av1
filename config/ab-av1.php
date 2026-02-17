@@ -3,6 +3,23 @@
 return [
     /*
     |--------------------------------------------------------------------------
+    | ab-av1 Binary
+    |--------------------------------------------------------------------------
+    |
+    | Path or command to execute the ab-av1 binary.
+    | Default: 'ab-av1' (assumes binary is in PATH)
+    |
+    | You can specify a custom path if ab-av1 is installed in a non-standard
+    | location, or to use a specific version:
+    |   - 'ab-av1' (default, uses PATH)
+    |   - '/usr/local/bin/ab-av1'
+    |   - '/home/user/.cargo/bin/ab-av1'
+    |
+    */
+    'binary' => env('AB_AV1_BINARY', 'ab-av1'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Logging Channel
     |--------------------------------------------------------------------------
     |

@@ -18,9 +18,22 @@ class CommandBuilder
 
     protected array $arguments = [];
 
-    public static function make(): self
+    public static function make(?string $binary = null): self
     {
-        return new self;
+        $instance = new self;
+
+        if ($binary) {
+            $instance->setBinary($binary);
+        }
+
+        return $instance;
+    }
+
+    public function setBinary(string $binary): self
+    {
+        $this->command = $binary;
+
+        return $this;
     }
 
     public function autoEncode(): self

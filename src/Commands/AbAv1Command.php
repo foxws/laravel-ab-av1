@@ -36,14 +36,16 @@ class AbAv1Command extends Command
         note("Package Version: {$packageVersion}");
 
         // Verify ab-av1 installation
+        $configuredBinary = Config::get('ab-av1.binary', 'ab-av1');
+
         $finder = new ExecutableFinder;
-        $abAv1Binary = $finder->find('ab-av1');
+        $abAv1Binary = $finder->find($configuredBinary);
         $ffmpegBinary = $finder->find('ffmpeg');
 
         if ($abAv1Binary) {
             $this->components->info("✓ ab-av1 found: {$abAv1Binary}");
         } else {
-            error('✗ ab-av1 not found in PATH');
+            error("✗ ab-av1 not found: {$configuredBinary}");
         }
 
         if ($ffmpegBinary) {

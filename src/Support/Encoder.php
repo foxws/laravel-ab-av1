@@ -41,17 +41,22 @@ class Encoder
 
     protected ?TemporaryDirectories $temporaryDirectories = null;
 
-    public function __construct(?LoggerInterface $logger = null, ?TemporaryDirectories $temporaryDirectories = null, ?int $timeout = null)
+    protected string $binary = 'ab-av1';
+
+    public function __construct(?LoggerInterface $logger = null, ?TemporaryDirectories $temporaryDirectories = null, ?int $timeout = null, ?string $binary = null)
     {
         $this->logger = $logger;
-        $this->builder = CommandBuilder::make();
+        $this->binary = $binary ?? 'ab-av1';
+        $this->builder = CommandBuilder::make($this->binary);
         $this->temporaryDirectories = $temporaryDirectories ?? app(TemporaryDirectories::class);
         $this->timeout = $timeout ?? 14400;
     }
 
     public static function create(?LoggerInterface $logger = null, ?TemporaryDirectories $temporaryDirectories = null, ?int $timeout = null, array $config = []): self
     {
-        $encoder = new self($logger, $temporaryDirectories, $timeout);
+        $binary = $config['binary'] ?? 'ab-av1';
+
+        $encoder = new self($logger, $temporaryDirectories, $timeout, $binary);
 
         // Apply configuration defaults
         if (filled($config['preset'] ?? null)) {
@@ -589,7 +594,8 @@ class Encoder
 
     protected function validateExecutablesExist(): void
     {
-        $abAv1Result = Process::run('which ab-av1');
+        $abAv1Result = Process::run("which {$this->binary}");
+
         if (! $abAv1Result->successful()) {
             throw ExecutableNotFoundException::abAv1NotFound();
         }

@@ -41,6 +41,25 @@ Publish the config:
 php artisan vendor:publish --provider="Foxws\AbAv1\AbAv1ServiceProvider"
 ```
 
+## Configuration
+
+### Binary Path
+
+By default, the package expects `ab-av1` to be in your system PATH. If you need to use a specific binary path or version, configure it in `config/ab-av1.php` or via environment variable:
+
+```bash
+# .env
+AB_AV1_BINARY=/usr/local/bin/ab-av1
+# Or use a specific cargo installation
+AB_AV1_BINARY=/home/user/.cargo/bin/ab-av1
+```
+
+Verify your installation:
+
+```bash
+php artisan ab-av1:info
+```
+
 ## Quick Start
 
 ```php
@@ -59,6 +78,7 @@ echo "CRF: {$result->getCRFUsed()}";
 ## Usage Examples
 
 ### Auto-encode (Recommended)
+
 Automatically find the best CRF for your target VMAF quality:
 
 ```php
@@ -71,6 +91,7 @@ $result = AbAv1::encode()
 ```
 
 ### Direct Encode
+
 Encode with a specific CRF value:
 
 ```php
@@ -82,6 +103,7 @@ $result = AbAv1::encode()
 ```
 
 ### Sample Encode
+
 Quick test to preview quality:
 
 ```php
@@ -92,6 +114,7 @@ $result = AbAv1::encode()
 ```
 
 ### Hardware Acceleration
+
 Enable VAAPI for faster encoding:
 
 ```php
