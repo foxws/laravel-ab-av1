@@ -1,6 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 return [
+
     /*
     |--------------------------------------------------------------------------
     | ab-av1 Binary
@@ -16,7 +19,8 @@ return [
     |   - '/home/user/.cargo/bin/ab-av1'
     |
     */
-    'binary' => env('AB_AV1_BINARY', 'ab-av1'),
+
+    'binary' => (string) env('AB_AV1_BINARY', 'ab-av1'),
 
     /*
     |--------------------------------------------------------------------------
@@ -27,7 +31,8 @@ return [
     | Default is the application's default log channel.
     |
     */
-    'log_channel' => env('AB_AV1_LOG_CHANNEL', 'stack'),
+
+    'log_channel' => env('AB_AV1_LOG_CHANNEL', env('LOG_CHANNEL', 'stack')),
 
     /*
     |--------------------------------------------------------------------------
@@ -48,7 +53,8 @@ return [
     | Adjust timeout based on your hardware and typical video length.
     |
     */
-    'timeout' => env('AB_AV1_TIMEOUT', 14400),
+
+    'timeout' => (int) env('AB_AV1_TIMEOUT', 14400),
 
     /*
     |--------------------------------------------------------------------------
@@ -68,6 +74,7 @@ return [
     | Lower presets take significantly longer but yield smaller files.
     |
     */
+
     'preset' => env('AB_AV1_PRESET', 4),
 
     /*
@@ -81,6 +88,7 @@ return [
     |          libx264, libx265, etc.
     |
     */
+
     'encoder' => env('AB_AV1_ENCODER', null),
 
     /*
@@ -92,6 +100,7 @@ return [
     | Example: 'av1_qsv_params=preset=slow:lookahead=1:lookahead_depth=60:extbrc=1'
     |
     */
+
     'encoder_args' => env('AB_AV1_ENCODER_ARGS', null),
 
     /*
@@ -103,6 +112,7 @@ return [
     | Default: yuv420p10le (10-bit) for AV1, yuv420p (8-bit) for hardware.
     |
     */
+
     'pix_format' => env('AB_AV1_PIX_FORMAT', null),
 
     /*
@@ -114,6 +124,7 @@ return [
     | Example: 'scale=1920:1080' to resize video.
     |
     */
+
     'video_filter' => env('AB_AV1_VIDEO_FILTER', null),
 
     /*
@@ -125,6 +136,7 @@ return [
     | Higher values show per-sample VMAF and ffmpeg commands.
     |
     */
+
     'verbosity' => env('AB_AV1_VERBOSITY', 0),
 
     /*
@@ -147,6 +159,7 @@ return [
     | perceived quality. Higher resolutions (4K) can use lower VMAF values.
     |
     */
+
     'min_vmaf' => env('AB_AV1_MIN_VMAF', 90),
 
     /*
@@ -158,6 +171,7 @@ return [
     | Used to prevent oversized encodes.
     |
     */
+
     'max_encoded_percent' => env('AB_AV1_MAX_ENCODED_PERCENT', 200),
 
     /*
@@ -176,6 +190,7 @@ return [
     | For 1080p content, 240 frames provides reliable quality assessment.
     |
     */
+
     'vframes' => env('AB_AV1_VFRAMES', null),
 
     /*
@@ -196,6 +211,7 @@ return [
     | provide better quality consistency across the entire video.
     |
     */
+
     'samples' => env('AB_AV1_SAMPLES', null),
 
     /*
@@ -220,6 +236,7 @@ return [
     |   "hwaccel=vaapi hwaccel_device=/dev/dri/renderD128 hwaccel_output_format=vaapi"
     |
     */
+
     'ffmpeg_input_options' => env('AB_AV1_FFMPEG_INPUT_OPTIONS', null),
 
     /*
@@ -229,6 +246,7 @@ return [
     |
     | Root directory for temporary files used during encoding.
     */
+
     'temporary_files_root' => env('AB_AV1_TEMPORARY_FILES_ROOT', storage_path('app/ab-av1/temp')),
 
     /*
@@ -239,5 +257,6 @@ return [
     | Cache storage directory for small files (e.g., RAM disk like /dev/shm).
     | Set to null to disable and use temporary_files_root for all operations.
     */
+
     'cache_files_root' => env('AB_AV1_CACHE_FILES_ROOT', '/dev/shm'),
 ];

@@ -275,6 +275,7 @@ class CommandBuilder
             } elseif (is_array($value)) {
                 // Handle repeatable flags (e.g., --enc-input can appear multiple times)
                 $key = Str::kebab($key);
+
                 foreach ($value as $item) {
                     $stringValue = (string) $item;
 
