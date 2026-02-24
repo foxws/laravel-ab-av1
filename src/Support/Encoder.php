@@ -16,6 +16,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use Psr\Log\LoggerInterface;
+use Throwable;
 
 /**
  * ab-av1 Encoder
@@ -519,7 +520,7 @@ class Encoder
             EncodingCompleted::dispatch($result, $executionTime);
 
             return $result;
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             $executionTime = microtime(true) - $startTime;
 
             if ($this->logger) {
