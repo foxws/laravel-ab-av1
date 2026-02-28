@@ -28,8 +28,14 @@ class AbAv1ServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
-        $this->app->singleton('laravel-ab-av1-logger', function () {
-            $logChannel = Config::get('ab-av1.log_channel');
+        // Register configuration singleton (must be first)
+        $this->app->singleton('laravel-ab-av1-configuration', function () {
+            return Config::get('ab-av1', []);
+        });
+
+        $this->app->singleton('laravel-ab-av1-logger', function ($app) {
+            $config = $app->make('laravel-ab-av1-configuration');
+            $logChannel = $config['log_channel'] ?? null;
 
             if ($logChannel === false) {
                 return null;
@@ -38,16 +44,13 @@ class AbAv1ServiceProvider extends PackageServiceProvider
             return app('log')->channel($logChannel ?: Config::string('logging.default', 'stack'));
         });
 
-        // Register configuration singleton (must be after logger)
-        $this->app->singleton('laravel-ab-av1-configuration', function () {
-            return Config::get('ab-av1', []);
-        });
-
         // Register TemporaryDirectories singleton
-        $this->app->singleton(TemporaryDirectories::class, function () {
+        $this->app->singleton(TemporaryDirectories::class, function ($app) {
+            $config = $app->make('laravel-ab-av1-configuration');
+
             return new TemporaryDirectories(
-                Config::string('ab-av1.temporary_files_root', storage_path('app/ab-av1/temp')),
-                Config::string('ab-av1.cache_files_root') ?: null,
+                $config['temporary_files_root'] ?? storage_path('app/ab-av1/temp'),
+                $config['cache_files_root'] ?: null,
             );
         });
 
@@ -66,9 +69,11 @@ class AbAv1ServiceProvider extends PackageServiceProvider
         });
 
         // Register the main class to use with the facade
-        $this->app->singleton('ab-av1', function () {
+        $this->app->singleton('ab-av1', function ($app) {
+            $config = $app->make('laravel-ab-av1-configuration');
+
             return new AbAv1(
-                Config::string('filesystems.default'),
+                $config['default_disk'] ?? Config::string('filesystems.default'),
                 null,
                 fn () => app(Encoder::class)
             );
