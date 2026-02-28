@@ -13,8 +13,8 @@ class EncodingFailed
     use Dispatchable, SerializesModels;
 
     public function __construct(
-        public Throwable $exception,
+        public string $inputPath,
+        public ?Throwable $exception = null,
         public float $executionTime = 0,
-        public array $context = [],
     ) {}
 }

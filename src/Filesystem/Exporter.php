@@ -76,14 +76,6 @@ class Exporter
     }
 
     /**
-     * Dump the final command and end the script.
-     */
-    public function dd(): void
-    {
-        dd($this->getCommand());
-    }
-
-    /**
      * Adds a callable that is invoked after the encoded file is saved.
      * The callback receives this Exporter instance and the EncodingResult.
      */
