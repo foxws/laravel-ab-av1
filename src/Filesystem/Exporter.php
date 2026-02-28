@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Foxws\AbAv1\Filesystem;
 
-use Foxws\AbAv1\Support\EncodingResult;
 use Foxws\AbAv1\Support\Encoder;
+use Foxws\AbAv1\Support\EncodingResult;
 use Illuminate\Contracts\Filesystem\Filesystem as FilesystemContract;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Traits\ForwardsCalls;
