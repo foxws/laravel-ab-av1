@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-ab-av1` will be documented in this file.
 
+## 0.5.0 - 2026-02-28
+
+### What's Changed
+
+* feat: Add force_generic_input configuration and improve media handling by @francoism90 in https://github.com/foxws/laravel-ab-av1/pull/3
+
+**Full Changelog**: https://github.com/foxws/laravel-ab-av1/compare/0.4.0...0.5.0
+
 ## 0.4.0 - 2026-02-21
 
 **Full Changelog**: https://github.com/foxws/laravel-ab-av1/compare/0.3.0...0.4.0
