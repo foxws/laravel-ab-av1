@@ -15,5 +15,6 @@ class EncodingFailed
     public function __construct(
         public string $inputPath,
         public ?Throwable $exception = null,
+        public float $executionTime = 0,
     ) {}
 }

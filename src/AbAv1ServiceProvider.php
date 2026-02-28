@@ -33,7 +33,6 @@ class AbAv1ServiceProvider extends PackageServiceProvider
             return Config::get('ab-av1', []);
         });
 
-        // Register logger singleton
         $this->app->singleton('laravel-ab-av1-logger', function ($app) {
             $config = $app->make('laravel-ab-av1-configuration');
             $logChannel = $config['log_channel'] ?? null;
@@ -42,7 +41,7 @@ class AbAv1ServiceProvider extends PackageServiceProvider
                 return null;
             }
 
-            return app('log')->channel($logChannel ?: config('logging.default'));
+            return app('log')->channel($logChannel ?: Config::string('logging.default', 'stack'));
         });
 
         // Register TemporaryDirectories singleton
@@ -51,12 +50,12 @@ class AbAv1ServiceProvider extends PackageServiceProvider
 
             return new TemporaryDirectories(
                 $config['temporary_files_root'] ?? storage_path('app/ab-av1/temp'),
-                $config['cache_files_root'] ?? null,
+                $config['cache_files_root'] ?: null,
             );
         });
 
-        // Register the Encoder
-        $this->app->singleton(Encoder::class, function ($app) {
+        // Register the Encoder as scoped so each request/job gets a fresh instance
+        $this->app->scoped(Encoder::class, function ($app) {
             $logger = $app->make('laravel-ab-av1-logger');
             $config = $app->make('laravel-ab-av1-configuration');
             $tempDirs = $app->make(TemporaryDirectories::class);
@@ -74,7 +73,7 @@ class AbAv1ServiceProvider extends PackageServiceProvider
             $config = $app->make('laravel-ab-av1-configuration');
 
             return new AbAv1(
-                $config['default_disk'] ?? config('filesystems.default'),
+                $config['default_disk'] ?? Config::string('filesystems.default'),
                 null,
                 fn () => app(Encoder::class)
             );
