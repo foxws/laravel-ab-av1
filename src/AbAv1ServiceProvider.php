@@ -28,35 +28,31 @@ class AbAv1ServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
-        // Register configuration singleton (must be first)
-        $this->app->singleton('laravel-ab-av1-configuration', function () {
-            return Config::get('ab-av1', []);
-        });
-
-        // Register logger singleton
-        $this->app->singleton('laravel-ab-av1-logger', function ($app) {
-            $config = $app->make('laravel-ab-av1-configuration');
-            $logChannel = $config['log_channel'] ?? null;
+        $this->app->singleton('laravel-ab-av1-logger', function () {
+            $logChannel = Config::get('ab-av1.log_channel');
 
             if ($logChannel === false) {
                 return null;
             }
 
-            return app('log')->channel($logChannel ?: config('logging.default'));
+            return app('log')->channel($logChannel ?: Config::string('logging.default', 'stack'));
+        });
+
+        // Register configuration singleton (must be after logger)
+        $this->app->singleton('laravel-ab-av1-configuration', function () {
+            return Config::get('ab-av1', []);
         });
 
         // Register TemporaryDirectories singleton
-        $this->app->singleton(TemporaryDirectories::class, function ($app) {
-            $config = $app->make('laravel-ab-av1-configuration');
-
+        $this->app->singleton(TemporaryDirectories::class, function () {
             return new TemporaryDirectories(
-                $config['temporary_files_root'] ?? storage_path('app/ab-av1/temp'),
-                $config['cache_files_root'] ?? null,
+                Config::string('ab-av1.temporary_files_root', storage_path('app/ab-av1/temp')),
+                Config::string('ab-av1.cache_files_root') ?: null,
             );
         });
 
-        // Register the Encoder
-        $this->app->singleton(Encoder::class, function ($app) {
+        // Register the Encoder as scoped so each request/job gets a fresh instance
+        $this->app->scoped(Encoder::class, function ($app) {
             $logger = $app->make('laravel-ab-av1-logger');
             $config = $app->make('laravel-ab-av1-configuration');
             $tempDirs = $app->make(TemporaryDirectories::class);
@@ -70,11 +66,9 @@ class AbAv1ServiceProvider extends PackageServiceProvider
         });
 
         // Register the main class to use with the facade
-        $this->app->singleton('ab-av1', function ($app) {
-            $config = $app->make('laravel-ab-av1-configuration');
-
+        $this->app->singleton('ab-av1', function () {
             return new AbAv1(
-                $config['default_disk'] ?? config('filesystems.default'),
+                Config::string('filesystems.default'),
                 null,
                 fn () => app(Encoder::class)
             );

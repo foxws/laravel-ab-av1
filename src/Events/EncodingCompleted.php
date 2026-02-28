@@ -14,6 +14,6 @@ class EncodingCompleted
 
     public function __construct(
         public EncodingResult $result,
-        public ?float $executionTime = null,
+        public float $executionTime = 0,
     ) {}
 }

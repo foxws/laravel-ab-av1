@@ -58,6 +58,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Force Generic Input Paths
+    |--------------------------------------------------------------------------
+    |
+    | Whether to force using a generic (symlinked/copied) input path for media
+    | files. This prevents issues with special characters in filenames when
+    | passing paths to ab-av1 on the command line.
+    |
+    */
+
+    'force_generic_input' => (bool) env('AB_AV1_FORCE_GENERIC_INPUT', true),
+
+    /*
+    |--------------------------------------------------------------------------
     | Default Preset
     |--------------------------------------------------------------------------
     |
@@ -259,4 +272,5 @@ return [
     */
 
     'cache_files_root' => env('AB_AV1_CACHE_FILES_ROOT', '/dev/shm'),
+
 ];

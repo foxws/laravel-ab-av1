@@ -6,10 +6,14 @@ namespace Foxws\AbAv1;
 
 use Foxws\AbAv1\Filesystem\Disk;
 use Foxws\AbAv1\Filesystem\Media;
+use Foxws\AbAv1\Filesystem\TemporaryDirectories;
 use Foxws\AbAv1\Support\Encoder;
+use Illuminate\Support\Traits\ForwardsCalls;
 
 class MediaOpener
 {
+    use ForwardsCalls;
+
     protected ?string $defaultDisk = null;
 
     protected ?Disk $disk = null;
@@ -57,10 +61,22 @@ class MediaOpener
     }
 
     /**
-     * Forward method calls to the encoder
+     * Clean up all temporary files created during this session.
      */
-    public function __call($method, $parameters)
+    public function cleanupTemporaryFiles(): self
     {
-        return $this->encoder()->$method(...$parameters);
+        app(TemporaryDirectories::class)->deleteAll();
+
+        return $this;
+    }
+
+    /**
+     * Forward method calls to the encoder, returning $this for fluent chaining.
+     */
+    public function __call(string $method, array $parameters): mixed
+    {
+        $result = $this->forwardCallTo($encoder = $this->encoder(), $method, $parameters);
+
+        return ($result === $encoder) ? $this : $result;
     }
 }

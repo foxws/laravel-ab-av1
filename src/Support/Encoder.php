@@ -530,7 +530,9 @@ class Encoder
                 ]);
             }
 
-            EncodingFailed::dispatch($this->inputPath ?? 'unknown', $exception);
+            EncodingFailed::dispatch($exception, $executionTime, [
+                'input' => $this->inputPath ?? 'unknown',
+            ]);
 
             throw $exception;
         }

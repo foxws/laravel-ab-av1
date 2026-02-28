@@ -116,7 +116,7 @@ class Disk
     /**
      * @phpstan-return FlysystemFilesystemAdapter
      */
-    private function getFlysystemAdapter(): FlysystemFilesystemAdapter
+    protected function getFlysystemAdapter(): FlysystemFilesystemAdapter
     {
         return $this->getFilesystemAdapter()->getAdapter();
     }
