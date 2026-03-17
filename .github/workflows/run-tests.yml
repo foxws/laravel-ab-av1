@@ -3,11 +3,11 @@ name: run-tests
 on:
   push:
     paths:
-      - '**.php'
-      - '.github/workflows/run-tests.yml'
-      - 'phpunit.xml.dist'
-      - 'composer.json'
-      - 'composer.lock'
+      - "**.php"
+      - ".github/workflows/run-tests.yml"
+      - "phpunit.xml.dist"
+      - "composer.json"
+      - "composer.lock"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,13 +22,13 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         php: [8.5, 8.4]
-        laravel: [12.*, 11.*]
+        laravel: [12.*, 13.*]
         stability: [prefer-stable]
         include:
           - laravel: 12.*
             testbench: 10.*
-          - laravel: 11.*
-            testbench: 9.*
+          - laravel: 13.*
+            testbench: 11.*
 
     name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
 
