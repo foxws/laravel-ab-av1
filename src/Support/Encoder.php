@@ -60,16 +60,16 @@ class Encoder
 
         // Apply configuration defaults via a declarative map
         $configMap = [
-            'preset'               => 'withPreset',
-            'min_vmaf'             => 'withMinVMAF',
-            'max_encoded_percent'  => 'withMaxEncodedPercent',
-            'vframes'              => 'withVFrames',
-            'samples'              => 'withSamples',
-            'encoder'              => 'withEncoder',
-            'encoder_args'         => 'withEncoderArgs',
-            'pix_format'           => 'withPixelFormat',
-            'video_filter'         => 'withVideoFilter',
-            'verbosity'            => 'withVerbosity',
+            'preset' => 'withPreset',
+            'min_vmaf' => 'withMinVMAF',
+            'max_encoded_percent' => 'withMaxEncodedPercent',
+            'vframes' => 'withVFrames',
+            'samples' => 'withSamples',
+            'encoder' => 'withEncoder',
+            'encoder_args' => 'withEncoderArgs',
+            'pix_format' => 'withPixelFormat',
+            'video_filter' => 'withVideoFilter',
+            'verbosity' => 'withVerbosity',
         ];
 
         foreach ($configMap as $key => $method) {
