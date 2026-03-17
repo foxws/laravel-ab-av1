@@ -2,6 +2,18 @@
 
 All notable changes to `laravel-ab-av1` will be documented in this file.
 
+## 0.8.0 - 2026-03-17
+
+### What's Changed
+
+* build(deps): Bump ramsey/composer-install from 3 to 4 by @dependabot[bot] in https://github.com/foxws/laravel-ab-av1/pull/4
+
+### New Contributors
+
+* @dependabot[bot] made their first contribution in https://github.com/foxws/laravel-ab-av1/pull/4
+
+**Full Changelog**: https://github.com/foxws/laravel-ab-av1/compare/0.7.0...0.8.0
+
 ## 0.7.0 - 2026-02-28
 
 **Full Changelog**: https://github.com/foxws/laravel-ab-av1/compare/0.6.0...0.7.0
