@@ -4,6 +4,7 @@ namespace Foxws\AbAv1\Tests\Feature;
 
 use Foxws\AbAv1\AbAv1;
 use Foxws\AbAv1\MediaOpener;
+use Foxws\AbAv1\Support\Encoder;
 
 it('can resolve ab-av1 from container', function () {
     $abAv1 = app(AbAv1::class);
@@ -23,7 +24,7 @@ it('respects configured timeout', function () {
 
     // Resolve fresh encoder from container
     app()->forgetInstance('laravel-ab-av1-configuration');
-    app()->forgetInstance(\Foxws\AbAv1\Support\Encoder::class);
+    app()->forgetInstance(Encoder::class);
 
     $abAv1 = app(AbAv1::class);
     $opener = $abAv1->new();

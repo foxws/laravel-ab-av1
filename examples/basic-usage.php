@@ -6,7 +6,12 @@
  * This file demonstrates common usage patterns for the Laravel ab-av1 package.
  */
 
+use App\Events\VideoEncoded;
+use Foxws\AbAv1\Events\EncodingCompleted;
+use Foxws\AbAv1\Events\EncodingFailed;
+use Foxws\AbAv1\Events\EncodingStarted;
 use Foxws\AbAv1\Facades\AbAv1;
+use Illuminate\Support\Facades\Event;
 
 /**
  * Example 1: Auto-encode with VMAF targeting
@@ -29,7 +34,7 @@ function example_auto_encode(): void
         echo "CRF Used: {$result->getCRFUsed()}".PHP_EOL;
         echo "Estimated Size: {$result->getEstimatedSize()} bytes".PHP_EOL;
         echo "Estimated Time: {$result->getEstimatedTime()} seconds".PHP_EOL;
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         echo "Encoding failed: {$e->getMessage()}".PHP_EOL;
     }
 }
@@ -53,7 +58,7 @@ function example_encode_with_crf(): void
 
         echo 'Encoding completed!'.PHP_EOL;
         echo "Output: {$result->getOutputPath()}".PHP_EOL;
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         echo "Encoding failed: {$e->getMessage()}".PHP_EOL;
     }
 }
@@ -77,7 +82,7 @@ function example_crf_search(): void
         echo 'Search Result:'.PHP_EOL;
         echo "  CRF: {$result->getCRFUsed()}".PHP_EOL;
         echo "  VMAF: {$result->getVMAFScore()}".PHP_EOL;
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         echo "CRF search failed: {$e->getMessage()}".PHP_EOL;
     }
 }
@@ -101,7 +106,7 @@ function example_sample_encode(): void
         echo "  VMAF Score: {$result->getVMAFScore()}".PHP_EOL;
         echo '  Predicted Size: '.round($result->getEstimatedSize() / 1024 / 1024, 2).' MB'.PHP_EOL;
         echo '  Predicted Time: '.round($result->getEstimatedTime() / 60, 2).' minutes'.PHP_EOL;
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         echo "Sample encoding failed: {$e->getMessage()}".PHP_EOL;
     }
 }
@@ -114,7 +119,7 @@ function example_sample_encode(): void
 function example_using_defaults(): void
 {
     // Requires config to be set up with defaults
-    $encoder = app(\Foxws\AbAv1\AbAv1::class)->withDefaults()
+    $encoder = app(Foxws\AbAv1\AbAv1::class)->withDefaults()
         ->withInput('/path/to/video.mp4')
         ->withOutput('/path/to/output.mp4');
 
@@ -122,7 +127,7 @@ function example_using_defaults(): void
         $result = $encoder->autoEncode();
 
         echo 'Encoding with defaults completed!'.PHP_EOL;
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         echo "Failed: {$e->getMessage()}".PHP_EOL;
     }
 }
@@ -147,7 +152,7 @@ function example_hardware_acceleration(): void
         $result = $encoder->autoEncode();
 
         echo 'Hardware-accelerated encoding completed!'.PHP_EOL;
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         echo "Failed: {$e->getMessage()}".PHP_EOL;
     }
 }
@@ -169,7 +174,7 @@ function example_vmaf_comparison(): void
 
         echo 'VMAF Comparison:'.PHP_EOL;
         echo "  VMAF Score: {$result->getVMAFScore()}".PHP_EOL;
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         echo "VMAF calculation failed: {$e->getMessage()}".PHP_EOL;
     }
 }
@@ -182,15 +187,15 @@ function example_vmaf_comparison(): void
 function example_event_listening(): void
 {
     // In a service provider or listener
-    \Foxws\AbAv1\Events\EncodingStarted::listen(function (\Foxws\AbAv1\Events\EncodingStarted $event) {
+    EncodingStarted::listen(function (EncodingStarted $event) {
         echo "Encoding started: {$event->inputPath}".PHP_EOL;
     });
 
-    \Foxws\AbAv1\Events\EncodingCompleted::listen(function (\Foxws\AbAv1\Events\EncodingCompleted $event) {
+    EncodingCompleted::listen(function (EncodingCompleted $event) {
         echo "Encoding completed! VMAF: {$event->result->getVMAFScore()}".PHP_EOL;
     });
 
-    \Foxws\AbAv1\Events\EncodingFailed::listen(function (\Foxws\AbAv1\Events\EncodingFailed $event) {
+    EncodingFailed::listen(function (EncodingFailed $event) {
         echo "Encoding failed: {$event->exception->getMessage()}".PHP_EOL;
     });
 }
@@ -231,8 +236,8 @@ function example_domain_integration(): void
         ]);
 
         // Dispatch event
-        \Illuminate\Support\Facades\Event::dispatch(new \App\Events\VideoEncoded($video, $result));
-    } catch (\Exception $e) {
+        Event::dispatch(new VideoEncoded($video, $result));
+    } catch (Exception $e) {
         $video->markAsFailed();
 
         throw $e;
@@ -261,7 +266,7 @@ function example_quicksync_with_args(): void
 
         echo 'QuickSync encoding completed!'.PHP_EOL;
         echo "VMAF Score: {$result->getVMAFScore()}".PHP_EOL;
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         echo "Failed: {$e->getMessage()}".PHP_EOL;
     }
 }
