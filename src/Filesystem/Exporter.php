@@ -91,15 +91,11 @@ class Exporter
      */
     protected function runAfterSavingCallbacks(EncodingResult $result): void
     {
-        if (empty($this->afterSavingCallbacks)) {
-            return;
+        foreach ($this->afterSavingCallbacks as $callback) {
+            $callback($this, $result);
         }
 
-        foreach ($this->afterSavingCallbacks as $key => $callback) {
-            call_user_func($callback, $this, $result);
-
-            unset($this->afterSavingCallbacks[$key]);
-        }
+        $this->afterSavingCallbacks = [];
     }
 
     /**

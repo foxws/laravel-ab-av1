@@ -12,7 +12,6 @@ use Foxws\AbAv1\Exceptions\InvalidEncodingConfigurationException;
 use Foxws\AbAv1\Filesystem\Exporter;
 use Foxws\AbAv1\Filesystem\TemporaryDirectories;
 use Illuminate\Contracts\Filesystem\Filesystem;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use Psr\Log\LoggerInterface;
@@ -59,45 +58,24 @@ class Encoder
 
         $encoder = new self($logger, $temporaryDirectories, $timeout, $binary);
 
-        // Apply configuration defaults
-        if (filled($config['preset'] ?? null)) {
-            $encoder->withPreset($config['preset']);
-        }
+        // Apply configuration defaults via a declarative map
+        $configMap = [
+            'preset'               => 'withPreset',
+            'min_vmaf'             => 'withMinVMAF',
+            'max_encoded_percent'  => 'withMaxEncodedPercent',
+            'vframes'              => 'withVFrames',
+            'samples'              => 'withSamples',
+            'encoder'              => 'withEncoder',
+            'encoder_args'         => 'withEncoderArgs',
+            'pix_format'           => 'withPixelFormat',
+            'video_filter'         => 'withVideoFilter',
+            'verbosity'            => 'withVerbosity',
+        ];
 
-        if (filled($config['min_vmaf'] ?? null)) {
-            $encoder->withMinVMAF($config['min_vmaf']);
-        }
-
-        if (filled($config['max_encoded_percent'] ?? null)) {
-            $encoder->withMaxEncodedPercent($config['max_encoded_percent']);
-        }
-
-        if (filled($config['vframes'] ?? null)) {
-            $encoder->withVFrames($config['vframes']);
-        }
-
-        if (filled($config['samples'] ?? null)) {
-            $encoder->withSamples($config['samples']);
-        }
-
-        if (filled($config['encoder'] ?? null)) {
-            $encoder->withEncoder($config['encoder']);
-        }
-
-        if (filled($config['encoder_args'] ?? null)) {
-            $encoder->withEncoderArgs($config['encoder_args']);
-        }
-
-        if (filled($config['pix_format'] ?? null)) {
-            $encoder->withPixelFormat($config['pix_format']);
-        }
-
-        if (filled($config['video_filter'] ?? null)) {
-            $encoder->withVideoFilter($config['video_filter']);
-        }
-
-        if (filled($config['verbosity'] ?? null)) {
-            $encoder->withVerbosity($config['verbosity']);
+        foreach ($configMap as $key => $method) {
+            if (filled($config[$key] ?? null)) {
+                $encoder->$method($config[$key]);
+            }
         }
 
         if (filled($config['ffmpeg_input_options'] ?? null)) {
@@ -301,9 +279,11 @@ class Encoder
     {
         // Convert array format to space-separated string
         if (is_array($options)) {
-            $options = Collection::make($options)
-                ->map(fn ($value, $key) => "{$key}={$value}")
-                ->implode(' ');
+            $options = implode(' ', array_map(
+                fn ($value, $key) => "{$key}={$value}",
+                $options,
+                array_keys($options),
+            ));
         }
 
         // Parse space-separated FFmpeg input options

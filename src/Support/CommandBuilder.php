@@ -193,23 +193,18 @@ class CommandBuilder
 
     public function withVerbosity(int $level = 1): self
     {
-        if ($level === 1) {
-            $this->arguments['v'] = true;
-        } elseif ($level >= 2) {
-            $this->arguments['vv'] = true;
-        }
+        match (true) {
+            $level >= 2 => $this->arguments['vv'] = true,
+            $level === 1 => $this->arguments['v'] = true,
+            default => null,
+        };
 
         return $this;
     }
 
     public function withEncoders(array $encoders): self
     {
-        // Store as comma-separated if multiple
-        if (count($encoders) > 1) {
-            $this->arguments['encoder'] = implode(',', $encoders);
-        } else {
-            $this->arguments['encoder'] = $encoders[0] ?? null;
-        }
+        $this->arguments['encoder'] = implode(',', $encoders) ?: null;
 
         return $this;
     }
