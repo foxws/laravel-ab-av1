@@ -2,6 +2,15 @@
 
 All notable changes to `laravel-ab-av1` will be documented in this file.
 
+## 1.0.1 - 2026-04-26
+
+### What's Changed
+
+* build(deps): Bump dependabot/fetch-metadata from 2.5.0 to 3.0.0 by @dependabot[bot] in https://github.com/foxws/laravel-ab-av1/pull/5
+* build(deps): Bump dependabot/fetch-metadata from 3.0.0 to 3.1.0 by @dependabot[bot] in https://github.com/foxws/laravel-ab-av1/pull/6
+
+**Full Changelog**: https://github.com/foxws/laravel-ab-av1/compare/1.0.0...1.0.1
+
 ## 1.0.0 - 2026-03-18
 
 **Full Changelog**: https://github.com/foxws/laravel-ab-av1/compare/v1.0.0...1.0.0
