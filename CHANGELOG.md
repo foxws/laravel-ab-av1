@@ -2,6 +2,16 @@
 
 All notable changes to `laravel-ab-av1` will be documented in this file.
 
+## 1.1.0 - 2026-09-26
+
+### What's Changed
+
+* Update the default AV1 preset (4 → 6) and minimum VMAF (90 → 94) for better quality by @francoism90 in https://github.com/foxws/laravel-ab-av1/commit/b262f7f
+* build(deps): Bump actions/checkout from 6 to 7 by @dependabot[bot] in https://github.com/foxws/laravel-ab-av1/pull/7
+* Document forwarded methods for static analysis by @francoism90 in https://github.com/foxws/laravel-ab-av1/pull/8
+
+**Full Changelog**: https://github.com/foxws/laravel-ab-av1/compare/1.0.1...1.1.0
+
 ## 1.0.1 - 2026-04-26
 
 ### What's Changed
