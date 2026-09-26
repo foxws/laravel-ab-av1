@@ -10,6 +10,41 @@ use Foxws\AbAv1\Filesystem\TemporaryDirectories;
 use Foxws\AbAv1\Support\Encoder;
 use Illuminate\Support\Traits\ForwardsCalls;
 
+/**
+ * @method void setInputPath(string $path)
+ * @method $this path(string $path)
+ * @method \Foxws\AbAv1\Support\CommandBuilder getBuilder()
+ * @method $this setLogger(?\Psr\Log\LoggerInterface $logger)
+ * @method $this setTimeout(int $seconds)
+ * @method int getTimeout()
+ * @method $this withInput(string $path)
+ * @method $this withOutput(string $path)
+ * @method $this withCRF(int $crf)
+ * @method $this withPreset(int|string $preset)
+ * @method $this withMinVMAF(float $vmaf)
+ * @method $this withMinXPSNR(float $xpsnr)
+ * @method $this withMaxEncodedPercent(int $percent)
+ * @method $this withVFrames(int $frames)
+ * @method $this withSamples(int $samples)
+ * @method $this withEncoder(string $encoder)
+ * @method $this withEncoderArgs(string $args)
+ * @method $this withPixelFormat(string $format)
+ * @method $this withVideoFilter(string $filter)
+ * @method $this withVerbosity(int $level = 1)
+ * @method $this withEncoders(array $encoders)
+ * @method $this withFFmpegOptions(array|string $options)
+ * @method $this withOption(string $key, mixed $value)
+ * @method $this withOptions(array $options)
+ * @method $this jsonOutput()
+ * @method \Foxws\AbAv1\Support\EncodingResult autoEncode()
+ * @method \Foxws\AbAv1\Support\EncodingResult crfSearch()
+ * @method \Foxws\AbAv1\Support\EncodingResult sampleEncode()
+ * @method \Foxws\AbAv1\Support\EncodingResult encode()
+ * @method \Foxws\AbAv1\Support\EncodingResult vmaf(string $referenceFile, string $distortedFile)
+ * @method \Foxws\AbAv1\Support\EncodingResult xpsnr(string $referenceFile, string $distortedFile)
+ * @method \Foxws\AbAv1\Filesystem\Exporter export()
+ * @method \Foxws\AbAv1\Filesystem\TemporaryDirectories getTemporaryDirectories()
+ */
 class MediaOpener
 {
     use ForwardsCalls;
