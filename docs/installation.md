@@ -53,3 +53,7 @@ php artisan ab-av1:info
 ```
 
 This shows the ab-av1 version it found, and the settings it will use.
+
+## AI agents
+
+The package includes a [Laravel Boost](https://github.com/laravel/boost) skill. Run `php artisan boost:install` (or `boost:update`) after installing, and your AI agent learns how to encode, verify and test with it.
