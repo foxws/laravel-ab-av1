@@ -2,6 +2,30 @@
 
 All notable changes to `laravel-ab-av1` will be documented in this file.
 
+## 2.0.0 - 2026-10-02
+
+### Breaking
+
+* `EncodingResult::getCRFUsed()` now returns `?float` instead of `?int`, and `setCRFUsed()` takes a `float`. ab-av1 v0.11 with svt-av1 v4 searches CRF in quarter steps (e.g. `30.25`), which the package couldn't read before.
+
+If you don't use the CRF value as an `int`, you can upgrade without changes.
+
+### What's Changed
+
+* Fix quarter-step CRF parsing and crfSearch, and add docs by @francoism90 in https://github.com/foxws/laravel-ab-av1/pull/9
+  * `getCRFUsed()` and `getVMAFScore()` returned `null` for quarter-step CRF results.
+  * `crfSearch()` ran a full `auto-encode` instead of `crf-search`.
+  * Commands without an output path crashed with a `TypeError`.
+  * ab-av1's sample files went to the working directory; they now go to a temporary directory.
+  * Config values set in `.env` (e.g. `AB_AV1_PRESET=4`) threw exceptions.
+  * `withCRF()` accepts floats up to 70, and `withPreset()` svt-av1 presets up to 13.
+  * New `withVerify()` and `withFailFast()`, for ab-av1 v0.11.7.
+  * All package exceptions now extend `RuntimeException`.
+  * PHPStan level 7, a `docs/` folder, a rewritten README, and a Laravel Boost skill.
+  
+
+**Full Changelog**: https://github.com/foxws/laravel-ab-av1/compare/1.1.0...2.0.0
+
 ## 1.1.0 - 2026-09-26
 
 ### What's Changed
