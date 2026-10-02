@@ -75,13 +75,14 @@ return [
     |--------------------------------------------------------------------------
     |
     | The default encoding preset to use.
-    | Range: 0 (slowest, best quality/compression) to 8 (fastest, lowest quality)
+    | Range for svt-av1: 0 (slowest, best quality/compression) to 13 (fastest)
     |
     | Recommended presets:
     | - 0-2: Very slow, best compression (for archival)
     | - 3-4: Slow, excellent compression (good)
     | - 5-6: Medium speed, good compression (balanced)
-    | - 7-8: Fast, lower compression (for quick encodes)
+    | - 7-10: Fast, lower compression (for quick encodes)
+    | - 11-13: Fastest, mainly for testing
     |
     | Preset 4 offers excellent quality-to-speed ratio for 1080p content.
     | Lower presets take significantly longer but yield smaller files.
