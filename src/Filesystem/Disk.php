@@ -17,10 +17,10 @@ use League\Flysystem\Local\LocalFilesystemAdapter;
  * @method string|null get(string $path)
  * @method bool put(string $path, string|resource $contents, mixed $options = [])
  * @method resource|null readStream(string $path)
- * @method bool writeStream(string $path, resource $resource, array $options = [])
+ * @method bool writeStream(string $path, resource $resource, array<string, mixed> $options = [])
  * @method bool makeDirectory(string $path)
  * @method bool setVisibility(string $path, string $visibility)
- * @method array allFiles(string|null $directory = null)
+ * @method array<int, string> allFiles(string|null $directory = null)
  */
 class Disk
 {
@@ -146,6 +146,8 @@ class Disk
 
     /**
      * Build a new filesystem instance with the given configuration.
+     *
+     * @param  array<string, mixed>  $config
      */
     public function buildFilesystem(array $config): Filesystem
     {
@@ -155,8 +157,10 @@ class Disk
     /**
      * Forwards all calls to Laravel's FilesystemAdapter which will pass
      * dynamic methods call onto Flysystem.
+     *
+     * @param  array<int, mixed>  $parameters
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters): mixed
     {
         return $this->forwardCallTo($this->getFilesystemAdapter(), $method, $parameters);
     }

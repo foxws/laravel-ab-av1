@@ -1,133 +1,74 @@
 # Laravel ab-av1
 
-A Laravel wrapper for [ab-av1](https://github.com/alexheretic/ab-av1), the AV1 video encoder with automatic CRF calculation and VMAF quality targeting.
-
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/foxws/laravel-ab-av1.svg?style=flat-square)](https://packagist.org/packages/foxws/laravel-ab-av1)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/foxws/laravel-ab-av1/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/foxws/laravel-ab-av1/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/foxws/laravel-ab-av1/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/foxws/laravel-ab-av1/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
+[![GitHub Tests Action Status](https://github.com/foxws/laravel-ab-av1/actions/workflows/run-tests.yml/badge.svg)](https://github.com/foxws/laravel-ab-av1/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![GitHub Code Style Action Status](https://github.com/foxws/laravel-ab-av1/actions/workflows/fix-php-code-style-issues.yml/badge.svg)](https://github.com/foxws/laravel-ab-av1/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/foxws/laravel-ab-av1.svg?style=flat-square)](https://packagist.org/packages/foxws/laravel-ab-av1)
 
-## Features
+Runs [ab-av1](https://github.com/alexheretic/ab-av1) from Laravel to encode video to AV1. You set the quality you want as a [VMAF](https://github.com/Netflix/vmaf) score, and ab-av1 finds the smallest encode that reaches it. Read the source from any Laravel disk, and write the result to any disk.
 
-- **Automatic CRF Discovery**: Find the optimal CRF value to achieve target VMAF quality
-- **Multiple Encoders**: Support for av1_svtenc, av1_vaapi, libx264, libx265, and other ffmpeg encoders
-- **Quick Sampling**: Test encode quality before full encoding
-- **Hardware Acceleration**: Support for VAAPI and other hardware acceleration methods
-- **VMAF/XPSNR Comparison**: Calculate quality scores between original and encoded files
-- **Event Dispatching**: Listen to encoding events (started, completed, failed)
-- **Fluent Interface**: Chainable configuration API
+See the [full documentation](docs): [Installation](docs/installation.md), [Usage](docs/usage.md), [Events](docs/events.md), [Configuration](docs/configuration.md).
+
+## Requirements
+
+- PHP 8.4 or higher
+- Laravel 12 or 13
+- [ab-av1](https://github.com/alexheretic/ab-av1), with FFmpeg built with svt-av1 and libvmaf
 
 ## Installation
-
-Ensure `ab-av1` is installed:
-
-```bash
-# macOS
-brew install ab-av1
-
-# Linux (Arch)
-sudo pacman -S ab-av1
-```
-
-Install the Laravel package:
 
 ```bash
 composer require foxws/laravel-ab-av1
 ```
 
-Publish the config:
-
 ```bash
-php artisan vendor:publish --provider="Foxws\AbAv1\AbAv1ServiceProvider"
+php artisan vendor:publish --tag="ab-av1-config"
 ```
 
-## Configuration
-
-### Binary Path
-
-By default, the package expects `ab-av1` to be in your system PATH. If you need to use a specific binary path or version, configure it in `config/ab-av1.php` or via environment variable:
-
-```bash
-# .env
-AB_AV1_BINARY=/usr/local/bin/ab-av1
-# Or use a specific cargo installation
-AB_AV1_BINARY=/home/user/.cargo/bin/ab-av1
-```
-
-Verify your installation:
+Install the `ab-av1` binary, then check the setup:
 
 ```bash
 php artisan ab-av1:info
 ```
 
-## Quick Start
+See [Installation](docs/installation.md) for details.
+
+## Quick start
 
 ```php
 use Foxws\AbAv1\Facades\AbAv1;
 
-$result = AbAv1::encode()
-    ->withInput('/path/to/video.mp4')
-    ->withPreset('medium')
+$encoder = AbAv1::fromDisk('media')->open('videos/clip.mp4');
+
+try {
+    $encoder
+        ->withPreset(6)
+        ->withMinVMAF(95)
+        ->export()
+        ->toDisk('s3')
+        ->toPath('encoded/clip.mp4')
+        ->save();
+} finally {
+    $encoder->cleanupTemporaryFiles();
+}
+```
+
+This finds the CRF that reaches a VMAF score of 95, encodes the video with it, and uploads the result to `encoded/clip.mp4` on the `s3` disk.
+
+For a file that's already on the server, pass its path and read the result:
+
+```php
+$result = AbAv1::withInput('/path/to/video.mp4')
+    ->withPreset(6)
     ->withMinVMAF(95)
+    ->withOutput('/path/to/output.mp4')
     ->autoEncode();
 
-echo "VMAF: {$result->getVMAFScore()}";
-echo "CRF: {$result->getCRFUsed()}";
+$result->getCRFUsed();   // e.g. 30.25
+$result->getVMAFScore(); // e.g. 95.1
 ```
 
-## Usage Examples
-
-### Auto-encode (Recommended)
-
-Automatically find the best CRF for your target VMAF quality:
-
-```php
-$result = AbAv1::encode()
-    ->withInput('video.mp4')
-    ->withPreset('medium')
-    ->withMinVMAF(95)
-    ->withOutput('output.mp4')
-    ->autoEncode();
-```
-
-### Direct Encode
-
-Encode with a specific CRF value:
-
-```php
-$result = AbAv1::encode()
-    ->withInput('video.mp4')
-    ->withCRF(30)
-    ->withPreset('slow')
-    ->encode();
-```
-
-### Sample Encode
-
-Quick test to preview quality:
-
-```php
-$result = AbAv1::encode()
-    ->withInput('video.mp4')
-    ->withCRF(28)
-    ->sampleEncode();
-```
-
-### Hardware Acceleration
-
-Enable VAAPI for faster encoding:
-
-```php
-$result = AbAv1::encode()
-    ->withInput('video.mp4')
-    ->withPreset('medium')
-    ->withMinVMAF(95)
-    ->withFFmpegOptions([
-        'hwaccel' => 'vaapi',
-        'hwaccel_output_format' => 'vaapi',
-    ])
-    ->autoEncode();
-```
+See [Usage](docs/usage.md) for the other ab-av1 commands, hardware encoders and checking the result.
 
 ## Testing
 
@@ -135,30 +76,23 @@ $result = AbAv1::encode()
 composer test
 ```
 
-## Documentation
+## Links
 
-See [examples/basic-usage.php](examples/basic-usage.php) for comprehensive usage examples.
-
-For detailed documentation, see the [generated docs](DOCUMENTATION_INDEX.md).
-
-## Changelog
-
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
-
-## Contributing
-
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
-
-## Security Vulnerabilities
-
-Please review [our security policy](../../security/policy) on how to report security vulnerabilities.
+- [CHANGELOG](CHANGELOG.md)
+- [Security policy](../../security/policy)
+- [ab-av1](https://github.com/alexheretic/ab-av1)
+- [Laravel Streamer](https://github.com/foxws/laravel-streamer), to package video into HLS and DASH streams
 
 ## Credits
 
-- [francoism90](https://github.com/foxws)
+- [francoism90](https://github.com/francoism90)
 - [All Contributors](../../contributors)
-- Inspired by [ab-av1](https://github.com/alexheretic/ab-av1)
+- [ab-av1](https://github.com/alexheretic/ab-av1) by Alex Butler, which does the actual work
+
+Used by [Stry](https://github.com/francoism90/stry), a self-hosted video streaming app.
+
+AI, specifically [Claude](https://claude.com/product/claude-code), was used to help build this package. All AI-assisted output is reviewed by me, and I retain final say over everything that is implemented and released.
 
 ## License
 
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+MIT. See [License File](LICENSE.md).

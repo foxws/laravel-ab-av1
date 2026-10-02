@@ -20,7 +20,7 @@ class EncodingResult
 
     protected ?float $xpsnrScore = null;
 
-    protected ?int $crfUsed = null;
+    protected ?float $crfUsed = null;
 
     protected ?int $estimatedSize = null;
 
@@ -28,8 +28,12 @@ class EncodingResult
 
     protected string $rawOutput;
 
+    /** @var array<string, mixed> */
     protected array $metadata = [];
 
+    /**
+     * @param  array<string, mixed>  $metadata
+     */
     public function __construct(
         string $inputPath,
         string $rawOutput,
@@ -48,15 +52,15 @@ class EncodingResult
         // ab-av1 tests multiple CRF values, so we need to get the last/final one
 
         // Parse all VMAF scores and get the last one (final chosen value)
-        // Format: "crf 20 VMAF 94.80"
-        if (preg_match_all('/crf\s+\d+\s+VMAF\s+([\d.]+)/i', $this->rawOutput, $matches)) {
+        // Format: "crf 20 VMAF 94.80", or "crf 30.25 VMAF 95.10" with svt-av1's quarter steps
+        if (preg_match_all('/crf\s+[\d.]+\s+VMAF\s+([\d.]+)/i', $this->rawOutput, $matches)) {
             $this->vmafScore = (float) end($matches[1]);
         }
 
         // Parse all CRF values and get the last one (final chosen value)
-        // Format: "crf 20 VMAF 94.80"
-        if (preg_match_all('/crf\s+(\d+)\s+VMAF/i', $this->rawOutput, $matches)) {
-            $this->crfUsed = (int) end($matches[1]);
+        // Format: "crf 20 VMAF 94.80", or "crf 30.25 VMAF 95.10" with svt-av1's quarter steps
+        if (preg_match_all('/crf\s+([\d.]+)\s+VMAF/i', $this->rawOutput, $matches)) {
+            $this->crfUsed = (float) end($matches[1]);
         }
 
         // Parse estimated encode size from ab-av1 output (get last occurrence)
@@ -74,9 +78,9 @@ class EncodingResult
             $this->estimatedTime = (float) end($matches[1]);
         }
 
-        // Fallback: Parse XPSNR score if available
-        if (preg_match('/XPSNR\s+([\d.]+)/i', $this->rawOutput, $matches)) {
-            $this->xpsnrScore = (float) $matches[1];
+        // Parse XPSNR scores and get the last one (final chosen value), like VMAF
+        if (preg_match_all('/XPSNR\s+(-?[\d.]+)/i', $this->rawOutput, $matches)) {
+            $this->xpsnrScore = (float) end($matches[1]);
         }
     }
 
@@ -181,12 +185,12 @@ class EncodingResult
         return $this;
     }
 
-    public function getCRFUsed(): ?int
+    public function getCRFUsed(): ?float
     {
         return $this->crfUsed;
     }
 
-    public function setCRFUsed(int $crf): self
+    public function setCRFUsed(float $crf): self
     {
         $this->crfUsed = $crf;
 
@@ -227,6 +231,9 @@ class EncodingResult
         return $this->rawOutput;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

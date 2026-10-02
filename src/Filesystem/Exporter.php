@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Foxws\AbAv1\Filesystem;
 
+use Foxws\AbAv1\Exceptions\EncodingException;
+use Foxws\AbAv1\Exceptions\InvalidEncodingConfigurationException;
 use Foxws\AbAv1\Support\Encoder;
 use Foxws\AbAv1\Support\EncodingResult;
 use Illuminate\Contracts\Filesystem\Filesystem as FilesystemContract;
@@ -29,6 +31,7 @@ class Exporter
 
     protected Encoder $encoder;
 
+    /** @var array<int, callable> */
     protected array $afterSavingCallbacks = [];
 
     public function __construct(Encoder $encoder)
@@ -105,7 +108,7 @@ class Exporter
     public function save(): bool
     {
         if (! $this->disk || ! $this->path) {
-            throw new \RuntimeException('Disk and path must be set before saving');
+            throw new InvalidEncodingConfigurationException('Disk and path must be set before saving. Use toDisk() and toPath().');
         }
 
         try {
@@ -119,7 +122,7 @@ class Exporter
             $result = $this->encoder->autoEncode();
 
             if (! file_exists($this->outputFile)) {
-                throw new \RuntimeException('Encoding failed: output file not found');
+                throw new EncodingException('Encoding failed: output file not found');
             }
 
             // Ensure directory exists
@@ -131,6 +134,10 @@ class Exporter
 
             // Copy file to destination
             $stream = fopen($this->outputFile, 'rb');
+
+            if ($stream === false) {
+                throw new EncodingException("Encoding failed: can't read the output file {$this->outputFile}");
+            }
 
             $this->filesystem->writeStream($this->path, $stream);
 
@@ -162,6 +169,8 @@ class Exporter
 
     /**
      * Forward method calls to the encoder for fluent chaining.
+     *
+     * @param  array<int, mixed>  $arguments
      */
     public function __call(string $method, array $arguments): mixed
     {

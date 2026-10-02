@@ -51,8 +51,25 @@ it('can set multiple encoders', function () {
 });
 
 it('validates crf range', function () {
-    CommandBuilder::make()->withCRF(64);
+    CommandBuilder::make()->withCRF(70.25);
 })->throws(\InvalidArgumentException::class);
+
+it('accepts svt-av1 quarter-step crf values up to 70', function () {
+    expect(CommandBuilder::make()->withCRF(30.25)->build())->toContain('--crf 30.25')
+        ->and(CommandBuilder::make()->withCRF(70)->build())->toContain('--crf 70');
+});
+
+it('can verify the finished encode and fail fast', function () {
+    $command = CommandBuilder::make()->autoEncode()->withVerify()->withFailFast()->build();
+
+    expect($command)->toContain('--verify')->toContain('--fail-fast');
+});
+
+it('leaves verify and fail fast off when disabled', function () {
+    $command = CommandBuilder::make()->autoEncode()->withVerify(false)->withFailFast(false)->build();
+
+    expect($command)->not->toContain('--verify')->not->toContain('--fail-fast');
+});
 
 it('validates preset values', function () {
     CommandBuilder::make()->withPreset('invalid-preset');
@@ -107,8 +124,12 @@ it('can set string preset', function () {
 });
 
 it('validates numeric preset range', function () {
-    CommandBuilder::make()->withPreset(9);
+    CommandBuilder::make()->withPreset(14);
 })->throws(\InvalidArgumentException::class);
+
+it('accepts svt-av1 presets up to 13', function () {
+    expect(CommandBuilder::make()->withPreset(13)->build())->toContain('--preset 13');
+});
 
 it('can set encoder args', function () {
     $command = CommandBuilder::make()

@@ -53,7 +53,7 @@ class AbAv1
      * Handle dynamic method calls into MediaOpener.
      *
      * @param  string  $method
-     * @param  array  $parameters
+     * @param  array<int, mixed>  $parameters
      * @return mixed
      */
     public function __call($method, $parameters)

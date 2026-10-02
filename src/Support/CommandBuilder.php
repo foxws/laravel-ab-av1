@@ -16,6 +16,7 @@ class CommandBuilder
 {
     protected string $command = 'ab-av1';
 
+    /** @var array<string, mixed> */
     protected array $arguments = [];
 
     public static function make(?string $binary = null): self
@@ -92,10 +93,14 @@ class CommandBuilder
         return $this;
     }
 
-    public function withCRF(int $crf): self
+    /**
+     * svt-av1 accepts quarter steps (e.g. 30.25) and values up to 70 since
+     * ab-av1 v0.11 with svt-av1 v4.
+     */
+    public function withCRF(int|float $crf): self
     {
-        if ($crf < 0 || $crf > 63) {
-            throw new \InvalidArgumentException("CRF value must be between 0 and 63, got {$crf}");
+        if ($crf < 0 || $crf > 70) {
+            throw new \InvalidArgumentException("CRF value must be between 0 and 70, got {$crf}");
         }
 
         $this->arguments['crf'] = $crf;
@@ -105,10 +110,10 @@ class CommandBuilder
 
     public function withPreset(int|string $preset): self
     {
-        // Handle numeric presets (0-8 for SVT-AV1)
+        // Handle numeric presets (0-13 for SVT-AV1, lower is slower and better)
         if (is_int($preset)) {
-            if ($preset < 0 || $preset > 8) {
-                throw new \InvalidArgumentException("Numeric preset must be between 0 and 8, got {$preset}");
+            if ($preset < 0 || $preset > 13) {
+                throw new \InvalidArgumentException("Numeric preset must be between 0 and 13, got {$preset}");
             }
 
             $this->arguments['preset'] = $preset;
@@ -202,6 +207,9 @@ class CommandBuilder
         return $this;
     }
 
+    /**
+     * @param  array<int, string>  $encoders
+     */
     public function withEncoders(array $encoders): self
     {
         $this->arguments['encoder'] = implode(',', $encoders) ?: null;
@@ -230,11 +238,36 @@ class CommandBuilder
         return $this;
     }
 
+    /**
+     * @param  array<string, mixed>  $options
+     */
     public function withOptions(array $options): self
     {
         foreach ($options as $key => $value) {
             $this->withOption($key, $value);
         }
+
+        return $this;
+    }
+
+    /**
+     * Decode the finished encode and fail on decode errors or a duration
+     * mismatch with the input. Requires ab-av1 v0.11.7 or later.
+     */
+    public function withVerify(bool $enabled = true): self
+    {
+        $this->arguments['verify'] = $enabled;
+
+        return $this;
+    }
+
+    /**
+     * Stop the final encode at the first error ffmpeg reports. Requires
+     * ab-av1 v0.11.7 or later.
+     */
+    public function withFailFast(bool $enabled = true): self
+    {
+        $this->arguments['fail-fast'] = $enabled;
 
         return $this;
     }
@@ -298,6 +331,9 @@ class CommandBuilder
         return implode(' ', $parts);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getArguments(): array
     {
         return $this->arguments;
