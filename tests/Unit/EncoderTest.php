@@ -2,7 +2,9 @@
 
 namespace Foxws\AbAv1\Tests\Unit;
 
+use Foxws\AbAv1\Filesystem\TemporaryDirectories;
 use Foxws\AbAv1\Support\Encoder;
+use Illuminate\Support\Facades\Process;
 
 it('can create an encoder instance', function () {
     $encoder = Encoder::create();
@@ -98,3 +100,76 @@ it('validates auto-encode configuration - missing min vmaf', function () {
 
     $encoder->autoEncode();
 })->throws(\Exception::class);
+
+it('applies config values set in .env, which arrive as strings', function () {
+    $arguments = Encoder::create(config: [
+        'preset' => '4',
+        'min_vmaf' => '93.5',
+        'max_encoded_percent' => '250',
+        'vframes' => '120',
+        'samples' => '8',
+    ])->getBuilder()->getArguments();
+
+    expect($arguments)->toMatchArray([
+        'preset' => 4,
+        'min-vmaf' => 93.5,
+        'max-encoded-percent' => 250,
+        'vframes' => 120,
+        'samples' => 8,
+    ]);
+});
+
+it('keeps a named preset from .env as it is', function () {
+    expect(Encoder::create(config: ['preset' => 'medium'])->getBuilder()->getArguments()['preset'])->toBe('medium');
+});
+
+/**
+ * Runs one encoder command with every process faked, and returns the ab-av1
+ * command line it ran (the `which` checks for the binaries are skipped).
+ */
+function runAbAv1(string $method, ?string $output = null): string
+{
+    $commands = [];
+
+    Process::fake(function ($process) use (&$commands) {
+        $commands[] = $process->command;
+
+        return Process::result();
+    });
+
+    $root = sys_get_temp_dir().'/ab-av1-test-'.bin2hex(random_bytes(4));
+
+    $encoder = Encoder::create(
+        temporaryDirectories: new TemporaryDirectories("{$root}/temp", "{$root}/cache"),
+        config: ['preset' => 6, 'min_vmaf' => 95],
+    )->withInput(tempnam(sys_get_temp_dir(), 'ab-av1'))->withCRF(30);
+
+    if ($output) {
+        $encoder->withOutput($output);
+    }
+
+    $encoder->$method();
+
+    return collect($commands)->first(fn (string $command) => ! str_starts_with($command, 'which'));
+}
+
+it('runs the ab-av1 subcommand for each method', function (string $method, string $subcommand) {
+    expect(runAbAv1($method, sys_get_temp_dir().'/out.mp4'))->toStartWith("ab-av1 {$subcommand} ");
+})->with([
+    ['autoEncode', 'auto-encode'],
+    ['crfSearch', 'crf-search'],
+    ['sampleEncode', 'sample-encode'],
+    ['encode', 'encode'],
+]);
+
+it('keeps ab-av1 sample files in a temporary directory', function () {
+    expect(runAbAv1('crfSearch'))->toMatch('/--temp-dir \S+\/temp\//');
+});
+
+it('passes no temp dir to a full encode, which takes no samples', function () {
+    expect(runAbAv1('encode', sys_get_temp_dir().'/out.mp4'))->not->toContain('--temp-dir');
+});
+
+it('runs a command without an output path', function () {
+    expect(runAbAv1('crfSearch'))->toStartWith('ab-av1 crf-search ');
+});

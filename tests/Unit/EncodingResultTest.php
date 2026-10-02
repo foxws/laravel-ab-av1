@@ -21,7 +21,19 @@ it('can parse crf value from output', function () {
 
     $result = new EncodingResult('/path/to/video.mp4', $output);
 
-    expect($result->getCRFUsed())->toBe(32);
+    expect($result->getCRFUsed())->toBe(32.0);
+});
+
+it('parses svt-av1 quarter-step crf values and their vmaf score', function () {
+    $output = <<<'OUTPUT'
+    [2026-08-21T10:00:00Z INFO  ab_av1::command::sample_encode] crf 32.5 VMAF 94.20 predicted video stream size 160.10 MiB (110%) taking 80 seconds
+    [2026-08-21T10:00:09Z INFO  ab_av1::command::sample_encode] crf 30.25 VMAF 95.10 predicted video stream size 174.92 MiB (119%) taking 81 seconds
+    OUTPUT;
+
+    $result = new EncodingResult('/path/to/video.mp4', $output);
+
+    expect($result->getCRFUsed())->toBe(30.25)
+        ->and($result->getVMAFScore())->toBe(95.10);
 });
 
 it('can parse estimated size from output', function () {

@@ -7,8 +7,10 @@ namespace Foxws\AbAv1\Support;
 use Foxws\AbAv1\Events\EncodingCompleted;
 use Foxws\AbAv1\Events\EncodingFailed;
 use Foxws\AbAv1\Events\EncodingStarted;
+use Foxws\AbAv1\Exceptions\EncodingException;
 use Foxws\AbAv1\Exceptions\ExecutableNotFoundException;
 use Foxws\AbAv1\Exceptions\InvalidEncodingConfigurationException;
+use Foxws\AbAv1\Exceptions\MediaNotFoundException;
 use Foxws\AbAv1\Filesystem\Exporter;
 use Foxws\AbAv1\Filesystem\TemporaryDirectories;
 use Illuminate\Contracts\Filesystem\Filesystem;
@@ -74,7 +76,7 @@ class Encoder
 
         foreach ($configMap as $key => $method) {
             if (filled($config[$key] ?? null)) {
-                $encoder->$method($config[$key]);
+                $encoder->$method(self::normalizeConfigValue($key, $config[$key]));
             }
         }
 
@@ -109,16 +111,30 @@ class Encoder
     }
 
     /**
+     * Values set in .env reach the config as strings, e.g. AB_AV1_PRESET=4
+     * gives "4", so cast them to the type each setter expects.
+     */
+    protected static function normalizeConfigValue(string $key, mixed $value): mixed
+    {
+        return match (true) {
+            in_array($key, ['max_encoded_percent', 'vframes', 'samples', 'verbosity'], true) => (int) $value,
+            $key === 'preset' && is_numeric($value) => (int) $value,
+            $key === 'min_vmaf' => (float) $value,
+            default => $value,
+        };
+    }
+
+    /**
      * Set the input file path relative to the disk
      */
     public function path(string $path): self
     {
         if (! $this->filesystem) {
-            throw new \RuntimeException('Disk must be set before setting path. Use fromDisk() first.');
+            throw new InvalidEncodingConfigurationException('Disk must be set before setting path. Use fromDisk() first.');
         }
 
         if (! $this->filesystem->exists($path)) {
-            throw new \RuntimeException("Input file not found on disk '{$this->disk}': {$path}");
+            throw new MediaNotFoundException("Input file not found on disk '{$this->disk}': {$path}");
         }
 
         // Get raw path of the file
@@ -163,7 +179,7 @@ class Encoder
     public function withInput(string $path): self
     {
         if (! file_exists($path)) {
-            throw new \RuntimeException("Input file not found: {$path}");
+            throw new MediaNotFoundException("Input file not found: {$path}");
         }
 
         $this->inputPath = $path;
@@ -184,7 +200,7 @@ class Encoder
         return $this;
     }
 
-    public function withCRF(int $crf): self
+    public function withCRF(int|float $crf): self
     {
         $this->builder->withCRF($crf);
 
@@ -318,6 +334,28 @@ class Encoder
         return $this;
     }
 
+    /**
+     * Decode the finished encode and fail on decode errors or a duration
+     * mismatch with the input. Requires ab-av1 v0.11.7 or later.
+     */
+    public function withVerify(bool $enabled = true): self
+    {
+        $this->builder->withVerify($enabled);
+
+        return $this;
+    }
+
+    /**
+     * Stop the final encode at the first error ffmpeg reports. Requires
+     * ab-av1 v0.11.7 or later.
+     */
+    public function withFailFast(bool $enabled = true): self
+    {
+        $this->builder->withFailFast($enabled);
+
+        return $this;
+    }
+
     public function jsonOutput(): self
     {
         $this->builder->jsonOutput(true);
@@ -381,11 +419,11 @@ class Encoder
     public function vmaf(string $referenceFile, string $distortedFile): EncodingResult
     {
         if (! file_exists($referenceFile)) {
-            throw new \RuntimeException("Reference file not found: {$referenceFile}");
+            throw new MediaNotFoundException("Reference file not found: {$referenceFile}");
         }
 
         if (! file_exists($distortedFile)) {
-            throw new \RuntimeException("Distorted file not found: {$distortedFile}");
+            throw new MediaNotFoundException("Distorted file not found: {$distortedFile}");
         }
 
         $this->builder->vmaf()
@@ -403,11 +441,11 @@ class Encoder
     public function xpsnr(string $referenceFile, string $distortedFile): EncodingResult
     {
         if (! file_exists($referenceFile)) {
-            throw new \RuntimeException("Reference file not found: {$referenceFile}");
+            throw new MediaNotFoundException("Reference file not found: {$referenceFile}");
         }
 
         if (! file_exists($distortedFile)) {
-            throw new \RuntimeException("Distorted file not found: {$distortedFile}");
+            throw new MediaNotFoundException("Distorted file not found: {$distortedFile}");
         }
 
         $this->builder->xpsnr()
@@ -447,9 +485,18 @@ class Encoder
     /**
      * Execute a command
      */
-    protected function executeCommand(string $command): EncodingResult
+    protected function executeCommand(string $subcommand): EncodingResult
     {
         $this->validateExecutablesExist();
+
+        $this->builder->withOption('command', $subcommand);
+
+        // ab-av1 writes its sample encodes to the working directory unless
+        // given --temp-dir, so keep them in a temporary directory, which
+        // cleanupTemporaryFiles() removes.
+        if ($this->temporaryDirectories && in_array($subcommand, ['auto-encode', 'crf-search', 'sample-encode'], true) && ! isset($this->builder->getArguments()['temp-dir'])) {
+            $this->builder->withOption('temp-dir', $this->temporaryDirectories->create());
+        }
 
         $command = $this->builder->build();
 
@@ -465,14 +512,18 @@ class Encoder
             // Change to output directory to prevent temp files in project root
             $workingDirectory = $this->outputPath ? dirname($this->outputPath) : null;
 
-            $process = Process::timeout($this->timeout)
-                ->path($workingDirectory)
-                ->run($command);
+            $pendingProcess = Process::timeout($this->timeout);
+
+            if ($workingDirectory) {
+                $pendingProcess->path($workingDirectory);
+            }
+
+            $process = $pendingProcess->run($command);
 
             $executionTime = microtime(true) - $startTime;
 
             if (! $process->successful()) {
-                throw new \RuntimeException("ab-av1 command failed: {$process->errorOutput()}");
+                throw new EncodingException("ab-av1 command failed: {$process->errorOutput()}");
             }
 
             // ab-av1 outputs logs to stderr, not stdout
