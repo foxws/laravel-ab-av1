@@ -2,6 +2,17 @@
 
 All notable changes to `laravel-ab-av1` will be documented in this file.
 
+## 2.0.1 - 2026-10-02
+
+2.0.0 added `withVerify()` and `withFailFast()`, but `MediaOpener` didn't declare them, so PHPStan reported them as undefined in apps using the package. This release declares them, and adds `withInput()` to the facade.
+
+### What's Changed
+
+* Raise PHPStan to level 8 by @francoism90 in https://github.com/foxws/laravel-ab-av1/pull/11
+* Declare withVerify(), withFailFast() and withInput() for static analysis by @francoism90 in https://github.com/foxws/laravel-ab-av1/pull/10
+
+**Full Changelog**: https://github.com/foxws/laravel-ab-av1/compare/2.0.0...2.0.1
+
 ## 2.0.0 - 2026-10-02
 
 ### Breaking
