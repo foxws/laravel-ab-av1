@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Foxws\AbAv1;
 
 use Closure;
+use Foxws\AbAv1\Exceptions\RuntimeException;
 use Foxws\AbAv1\Support\Encoder;
 use Illuminate\Support\Traits\ForwardsCalls;
 
@@ -39,7 +40,8 @@ class AbAv1
             return $this->encoder;
         }
 
-        $resolver = $this->encoderResolver;
+        $resolver = $this->encoderResolver
+            ?? throw new RuntimeException('AbAv1 needs an encoder or an encoder resolver.');
 
         return $this->encoder = $resolver();
     }

@@ -3,6 +3,7 @@
 namespace Foxws\AbAv1\Tests\Feature;
 
 use Foxws\AbAv1\AbAv1;
+use Foxws\AbAv1\Exceptions\RuntimeException;
 use Foxws\AbAv1\MediaOpener;
 use Foxws\AbAv1\Support\Encoder;
 
@@ -31,3 +32,7 @@ it('respects configured timeout', function () {
 
     expect($opener->getTimeout())->toBe(7200);
 });
+
+it('explains that it needs an encoder when none is given', function () {
+    (new AbAv1)->new();
+})->throws(RuntimeException::class, 'AbAv1 needs an encoder or an encoder resolver.');

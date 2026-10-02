@@ -41,7 +41,7 @@ class Encoder
 
     protected ?Filesystem $filesystem = null;
 
-    protected ?TemporaryDirectories $temporaryDirectories = null;
+    protected TemporaryDirectories $temporaryDirectories;
 
     protected string $binary = 'ab-av1';
 
@@ -489,9 +489,7 @@ class Encoder
      */
     public function cleanupTemporaryFiles(): void
     {
-        if ($this->temporaryDirectories) {
-            $this->temporaryDirectories->deleteAll();
-        }
+        $this->temporaryDirectories->deleteAll();
     }
 
     /**
@@ -506,7 +504,7 @@ class Encoder
         // ab-av1 writes its sample encodes to the working directory unless
         // given --temp-dir, so keep them in a temporary directory, which
         // cleanupTemporaryFiles() removes.
-        if ($this->temporaryDirectories && in_array($subcommand, ['auto-encode', 'crf-search', 'sample-encode'], true) && ! isset($this->builder->getArguments()['temp-dir'])) {
+        if (in_array($subcommand, ['auto-encode', 'crf-search', 'sample-encode'], true) && ! isset($this->builder->getArguments()['temp-dir'])) {
             $this->builder->withOption('temp-dir', $this->temporaryDirectories->create());
         }
 

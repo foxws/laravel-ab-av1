@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Foxws\AbAv1\Filesystem;
 
+use Foxws\AbAv1\Exceptions\MediaNotFoundException;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Config;
 
 class Media
 {
-    protected ?Disk $disk = null;
+    protected Disk $disk;
 
-    protected ?string $path = null;
+    protected string $path;
 
     protected ?string $temporaryDirectory = null;
 
@@ -42,7 +43,7 @@ class Media
         return $this->path;
     }
 
-    public function getDirectory(): ?string
+    public function getDirectory(): string
     {
         $directory = rtrim(pathinfo($this->getPath(), PATHINFO_DIRNAME), DIRECTORY_SEPARATOR);
 
@@ -115,7 +116,7 @@ class Media
         $temporaryDirectoryDisk = $this->temporaryDirectoryDisk();
 
         if ($disk->exists($path) && ! $temporaryDirectoryDisk->exists($path)) {
-            $temporaryDirectoryDisk->writeStream($path, $disk->readStream($path));
+            $temporaryDirectoryDisk->writeStream($path, $this->readStream($disk, $path));
         }
 
         return $temporaryDirectoryDisk->path($path);
@@ -157,7 +158,7 @@ class Media
                 // Copy for remote disks or when symlink unavailable
                 $temporaryDirectoryDisk->writeStream(
                     $name,
-                    $disk->readStream($this->getPath())
+                    $this->readStream($disk, $this->getPath())
                 );
             }
         }
@@ -179,7 +180,7 @@ class Media
         $destinationAdapter = $this->getDisk()->getFilesystemAdapter();
 
         foreach ($temporaryDirectoryDisk->allFiles() as $path) {
-            $destinationAdapter->writeStream($path, $temporaryDirectoryDisk->readStream($path));
+            $destinationAdapter->writeStream($path, $this->readStream($temporaryDirectoryDisk, $path));
 
             if ($visibility) {
                 $destinationAdapter->setVisibility($path, $visibility);
@@ -198,5 +199,17 @@ class Media
         }
 
         return $this;
+    }
+
+    /**
+     * Open a file on a disk for reading, failing clearly when it's gone
+     * instead of passing null on to writeStream().
+     *
+     * @return resource
+     */
+    protected function readStream(Disk $disk, string $path): mixed
+    {
+        return $disk->readStream($path)
+            ?? throw new MediaNotFoundException("Can't read {$path}: it no longer exists on its disk.");
     }
 }
