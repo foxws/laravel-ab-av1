@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Facade;
 /**
  * @method static \Foxws\AbAv1\MediaOpener fromDisk(string $disk)
  * @method static \Foxws\AbAv1\MediaOpener open(string $path)
+ * @method static \Foxws\AbAv1\MediaOpener withInput(string $path)
  * @method static \Foxws\AbAv1\MediaOpener cleanupTemporaryFiles()
  * @method static \Foxws\AbAv1\Filesystem\Exporter export()
  *
