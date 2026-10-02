@@ -31,10 +31,10 @@ use Illuminate\Support\Traits\ForwardsCalls;
  * @method $this withPixelFormat(string $format)
  * @method $this withVideoFilter(string $filter)
  * @method $this withVerbosity(int $level = 1)
- * @method $this withEncoders(array $encoders)
- * @method $this withFFmpegOptions(array|string $options)
+ * @method $this withEncoders(array<int, string> $encoders)
+ * @method $this withFFmpegOptions(array<string, string>|string $options)
  * @method $this withOption(string $key, mixed $value)
- * @method $this withOptions(array $options)
+ * @method $this withOptions(array<string, mixed> $options)
  * @method $this jsonOutput()
  * @method \Foxws\AbAv1\Support\EncodingResult autoEncode()
  * @method \Foxws\AbAv1\Support\EncodingResult crfSearch()
@@ -107,6 +107,8 @@ class MediaOpener
 
     /**
      * Forward method calls to the encoder, returning $this for fluent chaining.
+     *
+     * @param  array<int, mixed>  $parameters
      */
     public function __call(string $method, array $parameters): mixed
     {

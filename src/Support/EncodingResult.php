@@ -28,8 +28,12 @@ class EncodingResult
 
     protected string $rawOutput;
 
+    /** @var array<string, mixed> */
     protected array $metadata = [];
 
+    /**
+     * @param  array<string, mixed>  $metadata
+     */
     public function __construct(
         string $inputPath,
         string $rawOutput,
@@ -227,6 +231,9 @@ class EncodingResult
         return $this->rawOutput;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

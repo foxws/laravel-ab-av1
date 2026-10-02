@@ -11,6 +11,9 @@ class EncodingStarted
 {
     use Dispatchable, SerializesModels;
 
+    /**
+     * @param  array<string, mixed>|null  $options  The arguments passed to ab-av1.
+     */
     public function __construct(
         public string $inputPath,
         public ?array $options = null,

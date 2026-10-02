@@ -16,6 +16,7 @@ class CommandBuilder
 {
     protected string $command = 'ab-av1';
 
+    /** @var array<string, mixed> */
     protected array $arguments = [];
 
     public static function make(?string $binary = null): self
@@ -206,6 +207,9 @@ class CommandBuilder
         return $this;
     }
 
+    /**
+     * @param  array<int, string>  $encoders
+     */
     public function withEncoders(array $encoders): self
     {
         $this->arguments['encoder'] = implode(',', $encoders) ?: null;
@@ -234,6 +238,9 @@ class CommandBuilder
         return $this;
     }
 
+    /**
+     * @param  array<string, mixed>  $options
+     */
     public function withOptions(array $options): self
     {
         foreach ($options as $key => $value) {
@@ -324,6 +331,9 @@ class CommandBuilder
         return implode(' ', $parts);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getArguments(): array
     {
         return $this->arguments;

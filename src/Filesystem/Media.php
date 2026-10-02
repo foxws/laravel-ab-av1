@@ -27,7 +27,7 @@ class Media
         }
     }
 
-    public static function make($disk, string $path, bool $createTemp = true): self
+    public static function make(mixed $disk, string $path, bool $createTemp = true): self
     {
         return new self(Disk::make($disk), $path, $createTemp);
     }
@@ -44,7 +44,7 @@ class Media
 
     public function getDirectory(): ?string
     {
-        $directory = rtrim(pathinfo($this->getPath())['dirname'], DIRECTORY_SEPARATOR);
+        $directory = rtrim(pathinfo($this->getPath(), PATHINFO_DIRNAME), DIRECTORY_SEPARATOR);
 
         if ($directory === '.') {
             $directory = '';
@@ -168,7 +168,7 @@ class Media
         return $this->genericAlias;
     }
 
-    public function copyAllFromTemporaryDirectory(?string $visibility = null)
+    public function copyAllFromTemporaryDirectory(?string $visibility = null): self
     {
         if (! $this->temporaryDirectory) {
             return $this;
@@ -189,7 +189,7 @@ class Media
         return $this;
     }
 
-    public function setVisibility(string $path, ?string $visibility = null)
+    public function setVisibility(string $path, ?string $visibility = null): self
     {
         $disk = $this->getDisk();
 

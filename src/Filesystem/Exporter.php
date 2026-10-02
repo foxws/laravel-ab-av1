@@ -31,6 +31,7 @@ class Exporter
 
     protected Encoder $encoder;
 
+    /** @var array<int, callable> */
     protected array $afterSavingCallbacks = [];
 
     public function __construct(Encoder $encoder)
@@ -134,6 +135,10 @@ class Exporter
             // Copy file to destination
             $stream = fopen($this->outputFile, 'rb');
 
+            if ($stream === false) {
+                throw new EncodingException("Encoding failed: can't read the output file {$this->outputFile}");
+            }
+
             $this->filesystem->writeStream($this->path, $stream);
 
             if (is_resource($stream)) {
@@ -164,6 +169,8 @@ class Exporter
 
     /**
      * Forward method calls to the encoder for fluent chaining.
+     *
+     * @param  array<int, mixed>  $arguments
      */
     public function __call(string $method, array $arguments): mixed
     {

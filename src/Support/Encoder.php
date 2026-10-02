@@ -54,6 +54,9 @@ class Encoder
         $this->timeout = $timeout ?? 14400;
     }
 
+    /**
+     * @param  array<string, mixed>  $config  The package config, see config/ab-av1.php.
+     */
     public static function create(?LoggerInterface $logger = null, ?TemporaryDirectories $temporaryDirectories = null, ?int $timeout = null, array $config = []): self
     {
         $binary = $config['binary'] ?? 'ab-av1';
@@ -284,6 +287,9 @@ class Encoder
         return $this;
     }
 
+    /**
+     * @param  array<int, string>  $encoders
+     */
     public function withEncoders(array $encoders): self
     {
         $this->builder->withEncoders($encoders);
@@ -291,6 +297,9 @@ class Encoder
         return $this;
     }
 
+    /**
+     * @param  array<string, string>|string  $options
+     */
     public function withFFmpegOptions(array|string $options): self
     {
         // Convert array format to space-separated string
@@ -314,7 +323,7 @@ class Encoder
             $existing = [$existing];
         }
 
-        $merged = array_merge($existing, $encInputOptions);
+        $merged = array_merge($existing, $encInputOptions ?: []);
         $this->builder->withOption('enc-input', $merged);
 
         return $this;
@@ -327,6 +336,9 @@ class Encoder
         return $this;
     }
 
+    /**
+     * @param  array<string, mixed>  $options
+     */
     public function withOptions(array $options): self
     {
         $this->builder->withOptions($options);
