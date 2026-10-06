@@ -23,6 +23,7 @@ use Foxws\Media\Filesystem\TemporaryDirectories;
 use Foxws\Media\Filters\Custom;
 use Foxws\Media\Filters\Filter;
 use Foxws\Media\Filters\FilterType;
+use Foxws\Media\Filters\Number;
 use Foxws\Media\Opener;
 use Foxws\Media\Process\Progress;
 use Foxws\Media\Process\Runner;
@@ -254,7 +255,7 @@ class AbAv1Builder
 
         $this->options[$name] = match (true) {
             $value === true => true,
-            is_float($value) => rtrim(rtrim(sprintf('%.4F', $value), '0'), '.'),
+            is_float($value) => Number::format($value, 4),
             default => (string) $value,
         };
 

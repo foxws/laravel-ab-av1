@@ -14,7 +14,6 @@ use Foxws\Media\Events\ExportFailed;
 use Foxws\Media\Events\ProgressReported;
 use Foxws\Media\Exceptions\FailureReason;
 use Foxws\Media\Exceptions\ProcessFailedException;
-use Foxws\Media\Executables\Binary;
 use Foxws\Media\Executables\Executables;
 use Foxws\Media\Facades\Media;
 use Foxws\Media\Filters\Custom;
@@ -23,14 +22,12 @@ use Foxws\Media\Filters\Volume;
 use Foxws\Media\Opener;
 use Foxws\Media\Process\Progress;
 use Foxws\Media\Process\Runner;
-use Foxws\Media\Testing\FakeRunner;
 use Foxws\Media\Testing\MediaFake;
 use Illuminate\Process\PendingProcess;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use Psr\Log\AbstractLogger;
-use Psr\Log\LoggerInterface;
 
 beforeEach(function (): void {
     Storage::fake('media');
@@ -54,33 +51,6 @@ function lastAbAv1Run(MediaFake $fake): array
     $commands = $fake->commands(AbAv1Executable::AbAv1);
 
     return end($commands) ?: [];
-}
-
-/**
- * Make the faked ab-av1 log the given lines on its error output while it runs.
- */
-function streamAbAv1ErrorOutput(MediaFake $fake, string $errorOutput, ?LoggerInterface $logger = null): void
-{
-    app()->instance(Runner::class, new class($fake, app(Executables::class), $errorOutput, $logger) extends FakeRunner
-    {
-        public function __construct(MediaFake $fake, Executables $executables, protected string $errorOutput, ?LoggerInterface $logger)
-        {
-            parent::__construct($fake, $executables);
-
-            $this->logger = $logger;
-        }
-
-        protected function execute(Binary $executable, array $command, int $timeout, ?callable $onOutput, array $environment = []): array
-        {
-            if ($executable === AbAv1Executable::AbAv1 && $onOutput !== null) {
-                $onOutput($this->errorOutput, 'err');
-            }
-
-            [$exitCode, $output] = parent::execute($executable, $command, $timeout, $onOutput, $environment);
-
-            return [$exitCode, $output, $this->errorOutput];
-        }
-    });
 }
 
 it('auto-encodes to the target quality and saves the encode to the target disk', function (): void {
@@ -303,7 +273,7 @@ it('throws and dispatches ExportFailed when ab-av1 fails, without saving', funct
 
 it('reports the progress of the encode and dispatches it with context', function (): void {
     Event::fake([ProgressReported::class]);
-    streamAbAv1ErrorOutput($this->fake, implode("\n", [
+    FakeAbAv1::respond($this->fake, errorOutput: implode("\n", [
         '[2026-10-06T12:00:00Z INFO  ab_av1::command::sample_encode] encoding sample 1/4 crf 30',
         '[2026-10-06T12:00:16Z INFO  ab_av1::command::encode] 25%, 24.5 fps, eta 45 seconds',
         '[2026-10-06T12:00:32Z INFO  ab_av1::command::encode] 50%, 25 fps, eta 30 seconds',
@@ -328,7 +298,7 @@ it('reports the progress of the encode and dispatches it with context', function
 });
 
 it('cancels the encode when a progress callback returns false', function (): void {
-    streamAbAv1ErrorOutput($this->fake, "[2026-10-06T12:00:16Z INFO  ab_av1::command::encode] 25%, 24.5 fps, eta 45 seconds\n");
+    FakeAbAv1::respond($this->fake, errorOutput: "[2026-10-06T12:00:16Z INFO  ab_av1::command::encode] 25%, 24.5 fps, eta 45 seconds\n");
 
     expect(fn () => abAv1()->onProgress(fn (): bool => false)->save('av1/clip.mp4'))
         ->toThrow(fn (ProcessFailedException $exception) => expect($exception->reason)->toBe(FailureReason::Cancelled));
@@ -347,7 +317,8 @@ it('does not log what ab-av1 reports on its error output as warnings', function 
             $this->levels[] = $level;
         }
     };
-    streamAbAv1ErrorOutput($this->fake, "[2026-10-06T12:00:00Z INFO  ab_av1::command::crf_search] crf 30 successful\n", $logger);
+    FakeAbAv1::respond($this->fake, errorOutput: "[2026-10-06T12:00:00Z INFO  ab_av1::command::crf_search] crf 30 successful\n");
+    (fn () => $this->logger = $logger)->call(app(Runner::class));
 
     abAv1()->save('av1/clip.mp4');
 
