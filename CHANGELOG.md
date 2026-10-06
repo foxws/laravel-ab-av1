@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-ab-av1` will be documented in this file.
 
+## 3.0.0 - 2026-10-06
+
+### What's Changed
+
+* Build on laravel-media (3.0) by @francoism90 in https://github.com/foxws/laravel-ab-av1/pull/12
+
+**Full Changelog**: https://github.com/foxws/laravel-ab-av1/compare/2.0.1...3.0.0
+
 ## 2.0.1 - 2026-10-02
 
 2.0.0 added `withVerify()` and `withFailFast()`, but `MediaOpener` didn't declare them, so PHPStan reported them as undefined in apps using the package. This release declares them, and adds `withInput()` to the facade.
