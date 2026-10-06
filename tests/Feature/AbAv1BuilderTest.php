@@ -70,12 +70,17 @@ it('auto-encodes to the target quality and saves the encode to the target disk',
     Storage::disk('encoded')->assertExists('av1/clip.mp4');
 });
 
-it('saves to the disk the media was opened from by default, with the visibility', function (): void {
-    abAv1()->withVisibility('private')->save('av1/clip.mp4');
+it('saves to the disk the media was opened from by default', function (): void {
+    abAv1()->save('av1/clip.mp4');
 
     Storage::disk('media')->assertExists('av1/clip.mp4');
-    expect(Storage::disk('media')->getVisibility('av1/clip.mp4'))->toBe('private');
 });
+
+it('saves with the visibility', function (): void {
+    abAv1()->withVisibility('private')->save('av1/clip.mp4');
+
+    expect(Storage::disk('media')->getVisibility('av1/clip.mp4'))->toBe('private');
+})->skipOnWindows();
 
 it('encodes at a fixed CRF without searching when one is set', function (): void {
     abAv1()->withCRF(32.5)->save('av1/clip.mp4');
