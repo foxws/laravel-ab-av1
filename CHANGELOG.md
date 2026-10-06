@@ -2,6 +2,15 @@
 
 All notable changes to `laravel-ab-av1` will be documented in this file.
 
+## 3.1.0 - 2026-10-06
+
+### What's Changed
+
+* Report encode progress and stop logging ab-av1's reports as warnings by @francoism90 in https://github.com/foxws/laravel-ab-av1/pull/13
+* Use laravel-media's Number and faked error output by @francoism90 in https://github.com/foxws/laravel-ab-av1/pull/14
+
+**Full Changelog**: https://github.com/foxws/laravel-ab-av1/compare/3.0.0...3.1.0
+
 ## 3.0.0 - 2026-10-06
 
 ### What's Changed
