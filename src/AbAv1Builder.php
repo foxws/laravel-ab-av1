@@ -7,9 +7,12 @@ namespace Foxws\AbAv1;
 use Foxws\AbAv1\Exceptions\AbAv1Exception;
 use Foxws\Media\Concerns\HasContext;
 use Foxws\Media\Concerns\HasSaveCallbacks;
+use Foxws\Media\Concerns\ReportsProgress;
 use Foxws\Media\Encoding\PixelFormat;
 use Foxws\Media\Events\ExportCompleted;
 use Foxws\Media\Events\ExportFailed;
+use Foxws\Media\Events\ProgressReported;
+use Foxws\Media\Exceptions\ProcessCancelledException;
 use Foxws\Media\Exceptions\ProcessFailedException;
 use Foxws\Media\Executables\Executable;
 use Foxws\Media\Executables\Executables;
@@ -21,6 +24,7 @@ use Foxws\Media\Filters\Custom;
 use Foxws\Media\Filters\Filter;
 use Foxws\Media\Filters\FilterType;
 use Foxws\Media\Opener;
+use Foxws\Media\Process\Progress;
 use Foxws\Media\Process\Runner;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Config;
@@ -38,6 +42,7 @@ class AbAv1Builder
     use Conditionable;
     use HasContext;
     use HasSaveCallbacks;
+    use ReportsProgress;
 
     /**
      * The commands that accept each option. Options missing here, e.g. from withOption(), go to every command.
@@ -464,12 +469,15 @@ class AbAv1Builder
     }
 
     /**
-     * Run ab-av1 and return its error output and output, in which it reports its progress and results.
-     * Its sample encodes go to a temporary directory instead of the working directory.
+     * Run ab-av1 and return its error output and output, in which it reports its progress and results,
+     * so they aren't logged as warnings. Its sample encodes go to a temporary directory instead of the
+     * working directory.
      */
     protected function run(AbAv1Command $command, ?string $output = null): string
     {
         $samples = $command->encodesSamples() ? $this->directories->create() : null;
+        $reportsProgress = $output !== null && $this->reportsProgress();
+        $duration = $reportsProgress ? $this->opener->probe()->duration() : null;
 
         try {
             $result = $this->runner->run(
@@ -477,12 +485,39 @@ class AbAv1Builder
                 $this->arguments($command, $output, $samples?->path()),
                 timeout: $this->timeout ?? Config::integer('ab-av1.timeout', 14400),
                 environment: $this->environment(),
+                onErrorOutput: $reportsProgress ? $this->progressHandler(new AbAv1ProgressParser($duration)) : null,
+                logWarnings: false,
             );
         } finally {
             $samples?->delete();
         }
 
+        if ($reportsProgress) {
+            $this->report(new Progress(seconds: (float) $duration, duration: $duration, finished: true));
+        }
+
         return trim($result->errorOutput."\n".$result->output);
+    }
+
+    /**
+     * @return callable(string): void
+     */
+    protected function progressHandler(AbAv1ProgressParser $parser): callable
+    {
+        return function (string $output) use ($parser): void {
+            foreach ($parser->feed($output) as $progress) {
+                if (! $this->report($progress)) {
+                    throw ProcessCancelledException::make();
+                }
+            }
+        };
+    }
+
+    protected function report(Progress $progress): bool
+    {
+        Event::dispatch(new ProgressReported($progress, $this->context));
+
+        return $this->reportProgress($progress);
     }
 
     /**

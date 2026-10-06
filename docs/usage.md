@@ -153,7 +153,20 @@ public function handle(): void
 }
 ```
 
-`withContext()` is passed to laravel-media's `ExportCompleted` and `ExportFailed` events, which `save()` dispatches. The runner also dispatches `ProcessStarted`, `ProcessCompleted` and `ProcessFailed` for every command. ab-av1 doesn't report progress in a form the runner can read, so `onProgress()` isn't available.
+`withContext()` is passed to laravel-media's `ExportCompleted` and `ExportFailed` events, which `save()` dispatches. The runner also dispatches `ProcessStarted`, `ProcessCompleted` and `ProcessFailed` for every command. What ab-av1 reports on its error output, such as each tried CRF, isn't logged as a warning.
+
+## Progress
+
+`onProgress()` receives a `Foxws\Media\Process\Progress` while `save()` encodes the whole file, and laravel-media's `ProgressReported` event is dispatched with the context. Return `false` from the callback to cancel: ab-av1 is stopped and a `ProcessFailedException` with reason `Cancelled` is thrown.
+
+```php
+->abAv1()
+->withContext(['video_id' => $video->id])
+->onProgress(fn (Progress $progress) => $video->update(['progress' => $progress->percentage()]))
+->save("encoded/{$video->id}.mp4");
+```
+
+ab-av1 logs its progress after 16, 32, 64 seconds and so on, doubling each time, so expect few updates, then a finished one at 100%. The CRF search before an auto-encode reports none. `remaining()` follows ab-av1's estimate.
 
 ## Errors
 

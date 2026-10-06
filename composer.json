@@ -21,7 +21,7 @@
     ],
     "require": {
         "php": "^8.4",
-        "foxws/laravel-media": "^0.3.1",
+        "foxws/laravel-media": "^0.3.3",
         "illuminate/contracts": "^13.0",
         "illuminate/filesystem": "^13.0",
         "illuminate/support": "^13.0"
