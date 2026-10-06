@@ -28,6 +28,12 @@ it('encodes uploads to AV1', function () {
 
 Encodes write a placeholder file to their output and report the CRF and score, and `vmaf()` and `xpsnr()` return the score.
 
+To test progress, pass the lines ab-av1 logs on its error output while it encodes. They are streamed to `onProgress()` like a real run:
+
+```php
+FakeAbAv1::respond(Media::fake(), errorOutput: "[2026-10-06T12:00:16Z INFO  ab_av1::command::encode] 50%, 24 fps, eta 1 minute\n");
+```
+
 To test failures, make the next run fail:
 
 ```php

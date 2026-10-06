@@ -95,3 +95,5 @@ Storage::disk('media')->assertExists('encoded/1.mp4');
 
 $fake->failNext(AbAv1Executable::AbAv1, 'Error: ffmpeg encode exit code 1'); // test failures
 ```
+
+`FakeAbAv1::respond(..., errorOutput: "[… INFO  ab_av1::command::encode] 50%, 24 fps, eta 1 minute\n")` streams progress lines to `onProgress()`.
