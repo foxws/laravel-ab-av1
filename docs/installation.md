@@ -11,7 +11,9 @@ order: 1
 composer require foxws/laravel-ab-av1
 ```
 
-Publish the config file:
+This also installs [foxws/laravel-media](https://github.com/foxws/laravel-media), which opens the media, runs ab-av1 and saves the result. Its own settings (temporary files, logging, the ffmpeg and ffprobe paths) live in `config/media.php`.
+
+Publish the config file to change ab-av1's defaults:
 
 ```bash
 php artisan vendor:publish --tag="ab-av1-config"
@@ -34,7 +36,7 @@ brew install ab-av1
 cargo install ab-av1
 ```
 
-ab-av1 calls FFmpeg, so FFmpeg must be installed too, built with `libsvtav1` and `libvmaf`. Most distribution packages include both.
+ab-av1 calls FFmpeg, so FFmpeg must be installed too, built with `libsvtav1` and `libvmaf`. Most distribution packages include both. When laravel-media is configured with full paths to ffmpeg and ffprobe (`MEDIA_FFMPEG_PATH`, `MEDIA_FFPROBE_PATH`), ab-av1 runs those.
 
 Some features need a recent ab-av1: quarter-step CRF values need v0.11 with svt-av1 v4, and `withVerify()` and `withFailFast()` need v0.11.7.
 
@@ -49,10 +51,10 @@ AB_AV1_BINARY=/home/user/.cargo/bin/ab-av1
 ## Check the setup
 
 ```bash
-php artisan ab-av1:info
+php artisan media:info
 ```
 
-This shows the ab-av1 version it found, and the settings it will use.
+This lists ab-av1 next to ffmpeg and ffprobe, with the path and version it found. `php artisan about` shows the same paths.
 
 ## AI agents
 
