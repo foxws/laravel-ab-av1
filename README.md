@@ -34,6 +34,16 @@ php artisan media:info
 
 See [Installation](docs/installation.md) for details.
 
+> [!TIP]
+> Let your AI agent do the hard parts. This package ships a [Laravel Boost](https://laravel.com/docs/boost) skill, `laravel-ab-av1-development`, that teaches your agent how to install, configure and use Laravel ab-av1. Install Boost and select the skill when prompted:
+>
+> ```bash
+> composer require laravel/boost --dev
+> php artisan boost:install
+> ```
+>
+> Already using Boost? Run `php artisan boost:update --discover` to pick up the skill. Then just ask, for example: *"Encode uploaded videos to AV1 at a VMAF of 95 and save them to S3."*
+
 ## Quick start
 
 ```php
