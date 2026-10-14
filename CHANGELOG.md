@@ -2,6 +2,15 @@
 
 All notable changes to `laravel-ab-av1` will be documented in this file.
 
+## 3.1.1 - 2026-10-14
+
+### What's Changed
+
+* build(deps): Bump shivammathur/setup-php from 2.37.2 to 2.40.0 by @dependabot[bot] in https://github.com/foxws/laravel-ab-av1/pull/15
+* Add Laravel Boost tip to README and docs by @francoism90 in https://github.com/foxws/laravel-ab-av1/pull/16
+
+**Full Changelog**: https://github.com/foxws/laravel-ab-av1/compare/3.1.0...3.1.1
+
 ## 3.1.0 - 2026-10-06
 
 ### What's Changed
