@@ -2,6 +2,14 @@
 
 All notable changes to `laravel-ab-av1` will be documented in this file.
 
+## 3.1.3 - 2026-11-12
+
+### What's Changed
+
+* Support laravel-media 0.5 by @francoism90 in https://github.com/foxws/laravel-ab-av1/pull/18
+
+**Full Changelog**: https://github.com/foxws/laravel-ab-av1/compare/3.1.2...3.1.3
+
 ## 3.1.2 - 2026-10-26
 
 ### What's Changed
