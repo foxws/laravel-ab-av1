@@ -6,7 +6,7 @@ metadata:
   eyebrow: "Video · AV1 · VMAF"
   desc: "Encode video to AV1 at the quality you choose, without guessing encoder settings."
   lead: "Tell it the quality you want, and ab-av1 finds the smallest AV1 encode that reaches it. Read from any Laravel disk, and write to any disk."
-  requires: "PHP ^8.4"
+  requires: "PHP ^8.5"
   laravel: "13.x"
   runtime: "ab-av1, FFmpeg, foxws/laravel-media"
   licence: MIT
@@ -45,7 +45,7 @@ Media::fromDisk('media')
 
 ## Requirements
 
-- PHP 8.4 or higher
+- PHP 8.5 or higher
 - Laravel 13
 - [foxws/laravel-media](https://github.com/foxws/laravel-media) 0.3 or higher
 - [ab-av1](https://github.com/alexheretic/ab-av1), with FFmpeg built with svt-av1 and libvmaf

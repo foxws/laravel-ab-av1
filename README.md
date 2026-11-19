@@ -11,7 +11,7 @@ See the [full documentation](docs): [Installation](docs/installation.md), [Usage
 
 ## Requirements
 
-- PHP 8.4 or higher
+- PHP 8.5 or higher
 - Laravel 13
 - [foxws/laravel-media](https://github.com/foxws/laravel-media) 0.3 or higher (installed with the package)
 - [ab-av1](https://github.com/alexheretic/ab-av1), with FFmpeg built with svt-av1 and libvmaf
