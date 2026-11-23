@@ -2,7 +2,6 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/foxws/laravel-ab-av1.svg?style=flat-square)](https://packagist.org/packages/foxws/laravel-ab-av1)
 [![GitHub Tests Action Status](https://github.com/foxws/laravel-ab-av1/actions/workflows/tests.yml/badge.svg)](https://github.com/foxws/laravel-ab-av1/actions?query=workflow%3Atests+branch%3Amain)
-[![GitHub Code Style Action Status](https://github.com/foxws/laravel-ab-av1/actions/workflows/fix-php-code-style-issues.yml/badge.svg)](https://github.com/foxws/laravel-ab-av1/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/foxws/laravel-ab-av1.svg?style=flat-square)](https://packagist.org/packages/foxws/laravel-ab-av1)
 
 Runs [ab-av1](https://github.com/alexheretic/ab-av1) from Laravel to encode video to AV1. You set the quality you want as a [VMAF](https://github.com/Netflix/vmaf) score, and ab-av1 finds the smallest encode that reaches it. It's an add-on for [foxws/laravel-media](https://github.com/foxws/laravel-media): read the source from any Laravel disk, and write the result to any disk.
