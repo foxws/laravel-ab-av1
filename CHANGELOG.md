@@ -2,6 +2,18 @@
 
 All notable changes to `laravel-ab-av1` will be documented in this file.
 
+## 4.1.0 - 2026-11-26
+
+This release allows laravel-media 0.7. [0.7.0](https://github.com/foxws/laravel-media/releases/tag/0.7.0) replaces `php artisan media:info` with `php artisan media:doctor`, which checks ab-av1 next to ffmpeg and ffprobe. A missing ab-av1 is only a warning there, since it's only needed when you encode with it. The docs now point to `media:doctor`.
+
+### What's Changed
+
+* Pin the changelog workflow's actions and add the 4.0.0 entry by @francoism90 in https://github.com/foxws/laravel-ab-av1/pull/21
+* Remove auto-merge and the workflow that commits style fixes by @francoism90 in https://github.com/foxws/laravel-ab-av1/pull/22
+* Allow foxws/laravel-media 0.7 by @francoism90 in https://github.com/foxws/laravel-ab-av1/pull/23
+
+**Full Changelog**: https://github.com/foxws/laravel-ab-av1/compare/4.0.0...4.1.0
+
 ## 4.0.0 - 2026-11-23
 
 This release requires PHP 8.5 or newer. PHP 8.4 is no longer supported, and PHP 8.6 is now tested in CI. Stay on the previous major version if you still run PHP 8.4.
