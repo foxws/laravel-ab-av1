@@ -28,7 +28,7 @@ php artisan vendor:publish --tag="ab-av1-config"
 Install the `ab-av1` binary, then check the setup:
 
 ```bash
-php artisan media:info
+php artisan media:doctor
 ```
 
 See [Installation](docs/installation.md) for details.

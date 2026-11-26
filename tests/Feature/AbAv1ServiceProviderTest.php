@@ -21,7 +21,7 @@ it('adds abAv1() to opened media', function (): void {
         ->and($builder->disk()->name())->toBe('media');
 });
 
-it('registers ab-av1 with media:info and about', function (): void {
+it('registers ab-av1 with media:doctor and about', function (): void {
     expect(app(Executables::class)->all())->toContain(AbAv1Executable::AbAv1);
 });
 

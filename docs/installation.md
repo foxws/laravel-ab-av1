@@ -51,10 +51,10 @@ AB_AV1_BINARY=/home/user/.cargo/bin/ab-av1
 ## Check the setup
 
 ```bash
-php artisan media:info
+php artisan media:doctor
 ```
 
-This lists ab-av1 next to ffmpeg and ffprobe, with the path and version it found. `php artisan about` shows the same paths.
+This checks ab-av1 next to ffmpeg and ffprobe, with the path and version it found, and exits with an error when one of them can't run. A missing ab-av1 is only a warning, since it's only needed when you encode with it. `php artisan about` shows the same paths. Before laravel-media 0.7, run `php artisan media:info` instead.
 
 ## AI agents
 

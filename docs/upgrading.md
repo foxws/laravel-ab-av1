@@ -69,7 +69,7 @@ The quality and encoder methods keep their names: `withPreset()`, `withCRF()`, `
 ## Configuration
 
 - Removed: `log_channel`, `temporary_files_root`, `cache_files_root` (use `media.log_channel` and `media.temporary_files`), `force_generic_input` (commands no longer run through a shell, so file names can't break them), `vframes` and `verbosity`.
-- `php artisan ab-av1:info` is replaced by `php artisan media:info`, which lists ab-av1.
+- `php artisan ab-av1:info` is replaced by `php artisan media:doctor` (`media:info` before laravel-media 0.7), which lists ab-av1.
 
 ## Tests
 
